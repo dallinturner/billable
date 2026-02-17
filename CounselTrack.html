@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CounselTrack — Legal Billing, Simplified</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Epilogue:wght@300;400;500;600&display=swap');
+
+:root {
+  --black: #0d0d0d;
+  --off-black: #1a1a1a;
+  --dark: #2a2a2a;
+  --mid: #6b6b6b;
+  --light: #c8c8c8;
+  --border: #e8e8e8;
+  --off-white: #f8f7f5;
+  --white: #ffffff;
+  --amber: #d4820a;
+  --amber-light: #f0a830;
+  --amber-pale: #fef3e2;
+  --amber-glow: rgba(212,130,10,0.12);
+  --green: #1a6b3c;
+  --green-pale: #e8f5ee;
+  --red-pale: #fef2f2;
+  --red: #c0392b;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Epilogue', sans-serif;
+  background: var(--white);
+  color: var(--black);
+  overflow-x: hidden;
+}
+
+/* ============ NAV ============ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-dot {
+  width: 8px; height: 8px;
+  background: var(--amber);
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mid);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--black); }
+
+.nav-cta {
+  background: var(--black) !important;
+  color: var(--white) !important;
+  padding: 9px 22px;
+  border-radius: 4px;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  transition: background 0.2s !important;
+}
+
+.nav-cta:hover { background: var(--amber) !important; }
+
+/* ============ HERO ============ */
+.hero {
+  padding: 160px 48px 100px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.hero-left { animation: fadeUp 0.8s ease both; }
+.hero-right { animation: fadeUp 0.8s ease 0.2s both; }
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--amber-pale);
+  color: var(--amber);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+  border: 1px solid rgba(212,130,10,0.2);
+}
+
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 5vw, 62px);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--black);
+  margin-bottom: 24px;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--amber);
+}
+
+.hero-desc {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--mid);
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.btn-primary {
+  background: var(--black);
+  color: var(--white);
+  padding: 14px 32px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.15s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover { background: var(--amber); transform: translateY(-1px); }
+
+.btn-ghost {
+  color: var(--black);
+  padding: 14px 24px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-ghost:hover { color: var(--amber); }
+
+.hero-stats {
+  margin-top: 52px;
+  display: flex;
+  gap: 36px;
+  padding-top: 36px;
+  border-top: 1px solid var(--border);
+}
+
+.stat-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--mid);
+  margin-top: 2px;
+}
+
+/* HERO DASHBOARD MOCKUP */
+.hero-mockup {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.mockup-bar {
+  background: var(--off-black);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mockup-dot.red { background: #ff5f56; }
+.mockup-dot.yellow { background: #ffbd2e; }
+.mockup-dot.green { background: #27c93f; }
+
+.mockup-url {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin: 0 12px;
+}
+
+.mockup-body {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  height: 420px;
+}
+
+.mock-sidebar {
+  background: var(--off-black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+  gap: 20px;
+}
+
+.mock-sidebar-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.mock-sidebar-icon.active { background: var(--amber); }
+
+.mock-main {
+  background: var(--off-white);
+  overflow: hidden;
+  position: relative;
+}
+
+.mock-header {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mock-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.mock-timer-running {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--amber-pale);
+  border: 1px solid rgba(212,130,10,0.3);
+  border-radius: 6px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.timer-pulse {
+  width: 7px; height: 7px;
+  background: var(--amber);
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+.mock-content { padding: 16px 20px; }
+
+.mock-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mock-kpi {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.mock-kpi-label { font-size: 9px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.mock-kpi-val { font-size: 18px; font-weight: 700; color: var(--black); font-family: 'Playfair Display', serif; }
+.mock-kpi-sub { font-size: 9px; color: var(--green); margin-top: 2px; }
+
+.mock-entries {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mock-entry-header {
+  padding: 8px 12px;
+  background: var(--off-white);
+  border-bottom: 1px solid var(--border);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  display: grid;
+  grid-template-columns: 1fr 100px 60px 60px;
+  gap: 8px;
+}
+
+.mock-entry {
+  padding: 9px 12px;
+  display: grid;
+  grid-template-columns: 1fr 100px 60px 60px;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+}
+
+.mock-entry:last-child { border-bottom: none; }
+.mock-entry:hover { background: var(--off-white); }
+
+.mock-entry-matter { font-weight: 600; color: var(--black); }
+.mock-entry-client { font-size: 9px; color: var(--mid); margin-top: 1px; }
+.mock-entry-attorney { color: var(--mid); }
+.mock-entry-hours { font-weight: 600; color: var(--black); }
+.mock-entry-amount { font-weight: 600; color: var(--amber); }
+
+/* ============ SOCIAL PROOF ============ */
+.social-proof {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 48px;
+  background: var(--off-white);
+}
+
+.sp-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.sp-label {
+  font-size: 11px;
+  color: var(--light);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sp-firms {
+  display: flex;
+  gap: 48px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.sp-firm {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px;
+  color: var(--light);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ============ SECTION SHARED ============ */
+section {
+  padding: 100px 48px;
+}
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.section-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--black);
+  margin-bottom: 20px;
+}
+
+.section-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--mid);
+  font-weight: 300;
+  max-width: 520px;
+}
+
+/* ============ FEATURES ============ */
+#features { background: var(--white); }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  margin-top: 72px;
+}
+
+.features-grid.flip { direction: rtl; }
+.features-grid.flip > * { direction: ltr; }
+
+.feature-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 60px;
+  font-weight: 700;
+  color: var(--border);
+  line-height: 1;
+  margin-bottom: -8px;
+}
+
+.feature-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--black);
+}
+
+.feature-desc {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--mid);
+  font-weight: 300;
+  margin-bottom: 24px;
+}
+
+.feature-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feature-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--dark);
+  line-height: 1.5;
+}
+
+.feature-bullets li::before {
+  content: '\2192';
+  color: var(--amber);
+  flex-shrink: 0;
+  font-weight: 600;
+  margin-top: 1px;
+}
+
+/* ============ PRODUCT MOCKUPS ============ */
+
+/* TIME TRACKER */
+.mockup-time-tracker {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.mock-time-header {
+  background: var(--black);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mock-time-header-title { font-size: 12px; font-weight: 600; color: white; }
+
+.mock-stop-btn {
+  background: var(--amber);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mock-time-body { padding: 20px; }
+
+.mock-active-timer {
+  background: var(--amber-pale);
+  border: 1px solid rgba(212,130,10,0.25);
+  border-radius: 10px;
+  padding: 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mat-matter-name { font-size: 14px; font-weight: 600; color: var(--black); }
+.mat-client { font-size: 11px; color: var(--mid); margin-top: 2px; }
+
+.mat-timer {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--amber);
+  letter-spacing: 0.04em;
+}
+
+.mock-matters-list { display: flex; flex-direction: column; gap: 8px; }
+
+.mock-matter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.mock-matter-row:hover { border-color: var(--amber); background: var(--amber-pale); }
+
+.mmr-name { font-size: 12px; font-weight: 600; color: var(--black); }
+.mmr-client { font-size: 10px; color: var(--mid); margin-top: 2px; }
+.mmr-hours { font-size: 11px; font-weight: 600; color: var(--mid); }
+
+.mmr-switch {
+  background: var(--black);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.mock-matter-row:hover .mmr-switch { opacity: 1; }
+
+/* INVOICE */
+.mockup-invoice {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.inv-header {
+  padding: 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.inv-firm-name { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: var(--black); }
+.inv-firm-sub { font-size: 10px; color: var(--mid); margin-top: 2px; }
+
+.inv-badge {
+  background: var(--amber-pale);
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(212,130,10,0.2);
+}
+
+.inv-meta {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.inv-meta-label { font-size: 9px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 3px; }
+.inv-meta-val { font-size: 12px; font-weight: 600; color: var(--black); }
+
+.inv-line-header {
+  padding: 8px 24px;
+  background: var(--off-white);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 50px 70px 80px;
+  gap: 12px;
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.inv-line {
+  padding: 10px 24px;
+  display: grid;
+  grid-template-columns: 1fr 50px 70px 80px;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+  font-size: 11px;
+}
+
+.inv-line:last-of-type { border-bottom: 2px solid var(--border); }
+.inv-line-desc { color: var(--black); font-weight: 500; line-height: 1.4; }
+.inv-line-hrs { color: var(--mid); text-align: center; }
+.inv-line-rate { color: var(--mid); }
+.inv-line-amt { font-weight: 700; color: var(--black); text-align: right; }
+
+.inv-totals {
+  padding: 12px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.inv-total-row { display: flex; gap: 40px; font-size: 11px; }
+
+.inv-total-row.main {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  padding-top: 8px;
+  border-top: 2px solid var(--black);
+  margin-top: 4px;
+}
+
+.inv-total-label { color: var(--mid); }
+.inv-total-val { font-weight: 600; min-width: 80px; text-align: right; }
+
+/* ROLES & RATES */
+.mockup-roles {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.roles-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.roles-title { font-size: 13px; font-weight: 700; color: var(--black); }
+
+.roles-add-btn {
+  background: var(--black);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.roles-th {
+  padding: 8px 20px;
+  background: var(--off-white);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 80px 90px 90px 80px;
+  gap: 12px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.roles-row {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr 80px 90px 90px 80px;
+  gap: 12px;
+  align-items: center;
+  font-size: 11px;
+  transition: background 0.15s;
+}
+
+.roles-row:hover { background: var(--off-white); }
+
+.role-person { display: flex; align-items: center; gap: 10px; }
+
+.role-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.role-name { font-weight: 600; color: var(--black); font-size: 12px; }
+.role-email { font-size: 9px; color: var(--mid); margin-top: 1px; }
+
+.role-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.role-badge.partner { background: #1a1a1a; color: white; }
+.role-badge.associate { background: var(--amber-pale); color: var(--amber); }
+.role-badge.paralegal { background: #e8ecf4; color: #3a5a8a; }
+
+.role-rate { font-weight: 700; color: var(--black); }
+.role-access { font-size: 10px; color: var(--mid); }
+.role-matters { font-size: 10px; color: var(--mid); }
+
+/* MATTER MANAGEMENT */
+.mockup-matters {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.matters-toolbar {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.matters-search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 260px;
+}
+
+.matters-search-wrap input {
+  width: 100%;
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-family: 'Epilogue', sans-serif;
+  color: var(--dark);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.matters-search-wrap input:focus { border-color: var(--amber); }
+
+.matters-new-btn {
+  background: var(--black);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.matters-th {
+  padding: 8px 20px;
+  background: var(--off-white);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 80px 90px 80px;
+  gap: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.matter-row {
+  padding: 11px 20px;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 80px 90px 80px;
+  gap: 10px;
+  align-items: center;
+  font-size: 11px;
+  transition: background 0.15s;
+}
+
+.matter-row:last-child { border-bottom: none; }
+.matter-row:hover { background: var(--off-white); }
+
+.matter-name { font-weight: 600; color: var(--black); font-size: 12px; }
+.matter-sub { font-size: 9px; color: var(--mid); margin-top: 1px; }
+.matter-client-cell { color: var(--dark); font-size: 11px; }
+
+.matter-status {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.matter-status.active { background: var(--green-pale); color: var(--green); }
+.matter-status.pending { background: var(--amber-pale); color: var(--amber); }
+.matter-status.closed { background: #f0f0f0; color: var(--mid); }
+
+.matter-avatars { display: flex; }
+
+.matter-avatar {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: 700;
+  color: white;
+  border: 2px solid white;
+  margin-left: -6px;
+}
+
+.matter-avatar:first-child { margin-left: 0; }
+.matter-hours { font-weight: 600; color: var(--black); font-size: 11px; }
+
+/* TRUST / IOLTA */
+.mockup-trust {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.trust-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.trust-header-title { font-size: 13px; font-weight: 700; color: var(--black); }
+
+.trust-account-badge {
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--green-pale); color: var(--green);
+  padding: 4px 10px; border-radius: 100px;
+}
+
+.trust-balance-card {
+  margin: 16px 20px;
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.trust-bal-label { font-size: 10px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.trust-bal-amount { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--green); }
+.trust-bal-client { font-size: 11px; color: var(--mid); margin-top: 3px; }
+
+.trust-recon {
+  text-align: center;
+  padding: 10px 16px;
+  background: var(--green-pale);
+  border-radius: 8px;
+  border: 1px solid rgba(26,107,60,0.15);
+}
+
+.trust-recon-text { font-size: 9px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 0.08em; }
+
+.trust-ledger { padding: 0 20px 16px; }
+.trust-ledger-title { font-size: 10px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+.trust-txn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.trust-txn:last-child { border-bottom: none; }
+.trust-txn-desc { color: var(--dark); font-weight: 500; }
+.trust-txn-date { font-size: 9px; color: var(--mid); margin-top: 2px; }
+.trust-txn-amount { font-weight: 700; }
+.trust-txn-amount.credit { color: var(--green); }
+.trust-txn-amount.debit { color: var(--red); }
+
+/* ACCOUNTS RECEIVABLE */
+.mockup-ar {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.ar-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.ar-buckets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  padding: 16px 20px;
+}
+
+.ar-bucket {
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.ar-bucket:hover { border-color: var(--amber); }
+.ar-bucket-label { font-size: 9px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-weight: 600; }
+.ar-bucket-amount { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--black); }
+.ar-bucket-count { font-size: 9px; color: var(--mid); margin-top: 2px; }
+.ar-bucket.danger .ar-bucket-amount { color: var(--red); }
+.ar-bucket.warn .ar-bucket-amount { color: var(--amber); }
+
+.ar-overdue-header {
+  padding: 8px 20px;
+  background: var(--off-white);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1.2fr 80px 70px 90px;
+  gap: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ar-overdue-row {
+  padding: 10px 20px;
+  display: grid;
+  grid-template-columns: 1.2fr 80px 70px 90px;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.ar-overdue-row:last-child { border-bottom: none; }
+.ar-overdue-row:hover { background: var(--off-white); }
+.ar-client-name { font-weight: 600; color: var(--black); }
+.ar-inv-num { font-size: 9px; color: var(--mid); margin-top: 1px; }
+.ar-amount { font-weight: 600; color: var(--black); }
+.ar-days { font-weight: 600; }
+.ar-days.warn { color: var(--amber); }
+.ar-days.danger { color: var(--red); }
+
+.ar-remind-btn {
+  background: transparent;
+  border: 1px solid var(--amber);
+  color: var(--amber);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 9px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ar-remind-btn:hover { background: var(--amber); color: white; }
+
+/* REPORTING & ANALYTICS */
+.mockup-analytics {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.analytics-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.analytics-header-title { font-size: 13px; font-weight: 700; color: var(--black); }
+
+.analytics-period {
+  font-size: 10px; color: var(--mid);
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 10px;
+}
+
+.analytics-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 16px 20px;
+}
+
+.analytics-kpi {
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.analytics-kpi-label { font-size: 9px; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.analytics-kpi-val { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--black); }
+.analytics-kpi-sub { font-size: 9px; margin-top: 3px; }
+.analytics-kpi-sub.up { color: var(--green); }
+
+.analytics-chart { padding: 14px 20px 20px; }
+.analytics-chart-title { font-size: 10px; font-weight: 600; color: var(--mid); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; }
+
+.chart-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.chart-bar-row:last-child { margin-bottom: 0; }
+.chart-bar-label { width: 80px; font-size: 11px; font-weight: 600; color: var(--dark); flex-shrink: 0; }
+
+.chart-bar-track {
+  flex: 1;
+  height: 22px;
+  background: var(--off-white);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.chart-bar-fill { height: 100%; border-radius: 4px; transition: width 1s ease; }
+.chart-bar-fill.high { background: linear-gradient(90deg, var(--amber), var(--amber-light)); }
+.chart-bar-fill.mid { background: linear-gradient(90deg, #c8952a, #d4a440); }
+.chart-bar-fill.low { background: linear-gradient(90deg, #bbb, #ccc); }
+
+.chart-bar-val { font-size: 10px; font-weight: 700; color: var(--dark); width: 36px; text-align: right; flex-shrink: 0; }
+
+.chart-bar-target {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 2px;
+  background: var(--red);
+  opacity: 0.5;
+}
+
+/* CLIENT PORTAL */
+.mockup-portal {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.portal-header {
+  background: var(--black);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-firm-name { font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 700; color: white; }
+.portal-user { font-size: 10px; color: rgba(255,255,255,0.5); }
+
+.portal-welcome { padding: 18px 20px 8px; font-size: 14px; font-weight: 600; color: var(--black); }
+.portal-welcome-sub { font-size: 11px; color: var(--mid); font-weight: 400; margin-top: 2px; }
+
+.portal-invoices { padding: 10px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+
+.portal-invoice {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: border-color 0.2s;
+}
+
+.portal-invoice:hover { border-color: var(--amber); }
+.portal-inv-num { font-size: 12px; font-weight: 600; color: var(--black); }
+.portal-inv-date { font-size: 9px; color: var(--mid); margin-top: 2px; }
+.portal-inv-right { display: flex; align-items: center; gap: 12px; }
+.portal-inv-amount { font-size: 14px; font-weight: 700; color: var(--black); }
+
+.portal-inv-status {
+  display: inline-block;
+  padding: 3px 8px; border-radius: 3px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+}
+
+.portal-inv-status.paid { background: var(--green-pale); color: var(--green); }
+.portal-inv-status.outstanding { background: var(--amber-pale); color: var(--amber); }
+.portal-inv-status.overdue { background: var(--red-pale); color: var(--red); }
+
+.portal-pay-btn {
+  background: var(--amber); color: white;
+  border: none; border-radius: 4px;
+  padding: 5px 12px; font-size: 10px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+
+.portal-pay-btn:hover { background: var(--amber-light); }
+
+/* INTEGRATIONS */
+.mockup-integrations {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.intg-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 700; color: var(--black); }
+
+.intg-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 16px 20px; }
+
+.intg-card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.intg-card:hover { border-color: var(--amber); }
+
+.intg-icon {
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  background: var(--off-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.intg-info { flex: 1; }
+.intg-name { font-size: 12px; font-weight: 600; color: var(--black); }
+.intg-desc { font-size: 9px; color: var(--mid); margin-top: 2px; line-height: 1.4; }
+
+.intg-status {
+  font-size: 9px; font-weight: 700;
+  padding: 3px 8px; border-radius: 3px;
+  flex-shrink: 0; margin-top: 2px;
+}
+
+.intg-status.connected { background: var(--green-pale); color: var(--green); }
+
+.intg-status.available {
+  background: transparent;
+  color: var(--mid);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.intg-status.available:hover { border-color: var(--amber); color: var(--amber); }
+
+/* ============ HOW IT WORKS ============ */
+#how-it-works { background: var(--black); color: white; }
+#how-it-works .section-title { color: white; }
+#how-it-works .section-desc { color: rgba(255,255,255,0.5); }
+
+.steps-grid {
+  margin-top: 64px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  position: relative;
+}
+
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 26px;
+  left: calc(100%/12);
+  right: calc(100%/12);
+  height: 1px;
+  background: linear-gradient(90deg, var(--amber), rgba(212,130,10,0.3));
+}
+
+.step-item { text-align: center; padding: 0 8px; position: relative; z-index: 1; }
+
+.step-num {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: var(--off-black);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--amber);
+  transition: all 0.2s;
+}
+
+.step-item:hover .step-num {
+  background: var(--amber);
+  color: white;
+  border-color: var(--amber);
+  transform: scale(1.08);
+}
+
+.step-name { font-weight: 600; font-size: 12px; color: white; margin-bottom: 8px; }
+.step-detail { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+
+/* ============ TESTIMONIALS ============ */
+#testimonials { background: var(--off-white); }
+
+.testimonials-grid {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.testimonial {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+  transition: box-shadow 0.2s;
+}
+
+.testimonial:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.07); }
+
+.testimonial-stars { color: var(--amber); font-size: 14px; margin-bottom: 16px; }
+
+.testimonial-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--black);
+  font-style: italic;
+  margin-bottom: 24px;
+}
+
+.testimonial-author { display: flex; align-items: center; gap: 12px; }
+
+.testimonial-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+
+.testimonial-name { font-size: 13px; font-weight: 600; color: var(--black); }
+.testimonial-role { font-size: 11px; color: var(--mid); margin-top: 1px; }
+
+/* ============ PRICING ============ */
+#pricing { background: var(--white); }
+
+.pricing-grid {
+  margin-top: 56px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 900px;
+}
+
+.pricing-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.pricing-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
+
+.pricing-card.featured { background: var(--black); border-color: var(--black); color: white; }
+
+.pricing-tier { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-bottom: 12px; }
+.pricing-card.featured .pricing-tier { color: var(--amber); }
+
+.pricing-price { font-family: 'Playfair Display', serif; font-size: 40px; font-weight: 700; color: var(--black); margin-bottom: 4px; }
+.pricing-card.featured .pricing-price { color: white; }
+.pricing-period { font-size: 13px; color: var(--mid); margin-bottom: 24px; }
+.pricing-card.featured .pricing-period { color: rgba(255,255,255,0.5); }
+
+.pricing-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+
+.pricing-features li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--dark); }
+.pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.8); }
+
+.pricing-features li::before { content: '\2713'; color: var(--amber); font-weight: 700; flex-shrink: 0; }
+
+.pricing-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid var(--black);
+  background: transparent;
+  color: var(--black);
+  transition: all 0.2s;
+}
+
+.pricing-btn:hover { background: var(--black); color: white; }
+.pricing-card.featured .pricing-btn { background: var(--amber); border-color: var(--amber); color: white; }
+.pricing-card.featured .pricing-btn:hover { background: var(--amber-light); border-color: var(--amber-light); }
+
+/* ============ CTA ============ */
+.cta-section { background: var(--black); padding: 100px 48px; text-align: center; }
+.cta-inner { max-width: 640px; margin: 0 auto; }
+.cta-section .section-eyebrow { color: var(--amber); }
+
+.cta-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700;
+  color: white;
+  margin-bottom: 20px;
+  line-height: 1.15;
+}
+
+.cta-desc { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.7; font-weight: 300; margin-bottom: 40px; }
+
+.cta-form { display: flex; gap: 12px; max-width: 440px; margin: 0 auto; }
+
+.cta-input {
+  flex: 1;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 4px;
+  padding: 13px 18px;
+  font-size: 14px;
+  color: white;
+  font-family: 'Epilogue', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.cta-input::placeholder { color: rgba(255,255,255,0.3); }
+.cta-input:focus { border-color: var(--amber); }
+.cta-form .btn-primary { white-space: nowrap; }
+
+/* ============ FOOTER ============ */
+footer {
+  background: var(--off-black);
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.footer-logo { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: white; }
+.footer-copy { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+.footer-links { display: flex; gap: 28px; list-style: none; }
+
+.footer-links a {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover { color: var(--amber); }
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 1024px) {
+  .hero { grid-template-columns: 1fr; gap: 48px; }
+  .features-grid { grid-template-columns: 1fr; gap: 40px; }
+  .features-grid.flip { direction: ltr; }
+  .steps-grid { grid-template-columns: repeat(3, 1fr); gap: 32px; }
+  .steps-grid::before { display: none; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+  .ar-buckets { grid-template-columns: repeat(2, 1fr); }
+  .intg-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  nav { padding: 0 24px; }
+  .nav-links { display: none; }
+  section { padding: 72px 24px; }
+  .hero { padding: 120px 24px 72px; }
+  .social-proof { padding: 24px; }
+  .sp-inner { flex-direction: column; align-items: flex-start; }
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+  footer { flex-direction: column; gap: 24px; text-align: center; }
+  .cta-form { flex-direction: column; }
+  .ar-buckets { grid-template-columns: 1fr 1fr; }
+  .analytics-kpis { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo"><span class="logo-dot"></span>CounselTrack</a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#" class="nav-cta">Request Demo</a></li>
+  </ul>
+</nav>
+
+<!-- ========== HERO ========== -->
+<section style="padding: 0; overflow: visible;">
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-badge">Built for law firms</div>
+      <h1>Billing that works as hard as <em>your attorneys do</em></h1>
+      <p class="hero-desc">CounselTrack makes time capture effortless, invoicing automatic, and firm financials finally clear &mdash; so your team can focus on practicing law, not chasing hours.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary">Start Free Trial</a>
+        <a href="#how-it-works" class="btn-ghost">See how it works</a>
+      </div>
+      <div class="hero-stats">
+        <div><div class="stat-num">94%</div><div class="stat-label">reduction in unbilled time</div></div>
+        <div><div class="stat-num">2.4x</div><div class="stat-label">faster invoice generation</div></div>
+        <div><div class="stat-num">$0</div><div class="stat-label">setup cost</div></div>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="hero-mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dot red"></div>
+          <div class="mockup-dot yellow"></div>
+          <div class="mockup-dot green"></div>
+          <div class="mockup-url">app.counseltrack.com/dashboard</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mock-sidebar">
+            <div class="mock-sidebar-icon active">&#x1F4CA;</div>
+            <div class="mock-sidebar-icon">&#x23F1;</div>
+            <div class="mock-sidebar-icon">&#x1F4C1;</div>
+            <div class="mock-sidebar-icon">&#x1F9FE;</div>
+            <div class="mock-sidebar-icon">&#x1F465;</div>
+            <div class="mock-sidebar-icon" style="margin-top: auto">&#x2699;</div>
+          </div>
+          <div class="mock-main">
+            <div class="mock-header">
+              <div class="mock-title">Dashboard &mdash; February 2026</div>
+              <div class="mock-timer-running">
+                <div class="timer-pulse"></div>
+                Hendricks v. Cole &middot; 1h 24m
+              </div>
+            </div>
+            <div class="mock-content">
+              <div class="mock-kpi-row">
+                <div class="mock-kpi"><div class="mock-kpi-label">Hours This Month</div><div class="mock-kpi-val">84.4</div><div class="mock-kpi-sub">&uarr; 12% vs last month</div></div>
+                <div class="mock-kpi"><div class="mock-kpi-label">Billed</div><div class="mock-kpi-val" style="color: var(--amber)">$38,200</div><div class="mock-kpi-sub" style="color: var(--amber)">3 invoices sent</div></div>
+                <div class="mock-kpi"><div class="mock-kpi-label">Collected</div><div class="mock-kpi-val" style="color: var(--green)">$24,500</div><div class="mock-kpi-sub">&uarr; 8% vs last month</div></div>
+              </div>
+              <div class="mock-entries">
+                <div class="mock-entry-header"><span>Matter / Client</span><span>Attorney</span><span>Hours</span><span>Amount</span></div>
+                <div class="mock-entry"><div><div class="mock-entry-matter">Hendricks v. Cole</div><div class="mock-entry-client">Hendricks Family Trust</div></div><div class="mock-entry-attorney">J. Walsh</div><div class="mock-entry-hours">6.4h</div><div class="mock-entry-amount">$2,880</div></div>
+                <div class="mock-entry"><div><div class="mock-entry-matter">TechCorp Acquisition</div><div class="mock-entry-client">TechCorp Inc.</div></div><div class="mock-entry-attorney">M. Reyes</div><div class="mock-entry-hours">12.2h</div><div class="mock-entry-amount">$9,150</div></div>
+                <div class="mock-entry"><div><div class="mock-entry-matter">Estate of J. Marion</div><div class="mock-entry-client">Marion Estate</div></div><div class="mock-entry-attorney">A. Park</div><div class="mock-entry-hours">3.8h</div><div class="mock-entry-amount">$570</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<div class="social-proof">
+  <div class="sp-inner">
+    <div class="sp-label">Trusted by</div>
+    <div class="sp-firms">
+      <div class="sp-firm">Walsh &amp; Partners LLP</div>
+      <div class="sp-firm">Caldwell Legal Group</div>
+      <div class="sp-firm">Morrison Reyes PC</div>
+      <div class="sp-firm">Blackstone Chambers</div>
+      <div class="sp-firm">The Park Law Firm</div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== FEATURES ========== -->
+<section id="features">
+  <div class="section-inner">
+    <div class="section-eyebrow">Core Features</div>
+    <h2 class="section-title">Every tool your firm<br>needs, nothing it doesn't</h2>
+    <p class="section-desc">Built around how attorneys actually work &mdash; not how software engineers think they should.</p>
+
+    <!-- 01: Time Capture -->
+    <div class="features-grid reveal">
+      <div class="feature-text">
+        <div class="feature-number">01</div>
+        <h3 class="feature-title">Time Capture That Keeps Up</h3>
+        <p class="feature-desc">One-click timers for real-time tracking, instant switching between matters, and a fast manual entry mode for attorneys who prefer to log at end of day.</p>
+        <ul class="feature-bullets">
+          <li>Running timer visible in every screen &mdash; never lose a minute</li>
+          <li>Switch matters in two clicks without stopping the clock</li>
+          <li>6-minute increment rounding built in as default</li>
+          <li>Batch manual entry for end-of-day reconstruction</li>
+          <li>Calendar sync suggests entries based on your schedule</li>
+        </ul>
+      </div>
+      <div class="mockup-time-tracker">
+        <div class="mock-time-header"><div class="mock-time-header-title">&#x23F1; Time Tracker</div><div class="mock-stop-btn">&#x25A0; Stop &amp; Save</div></div>
+        <div class="mock-time-body">
+          <div class="mock-active-timer">
+            <div><div class="mat-matter-name">TechCorp Acquisition &mdash; M&amp;A Review</div><div class="mat-client">TechCorp Inc. &middot; M. Reyes, Partner</div></div>
+            <div class="mat-timer">2:14:38</div>
+          </div>
+          <div style="font-size:11px;color:var(--mid);font-weight:600;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em;">Switch to another matter</div>
+          <div class="mock-matters-list">
+            <div class="mock-matter-row"><div class="mmr-left"><div class="mmr-name">Hendricks v. Cole &mdash; Trial Prep</div><div class="mmr-client">Hendricks Family Trust</div></div><div style="display:flex;align-items:center;gap:12px;"><div class="mmr-hours">6.4h today</div><button class="mmr-switch">Switch &rarr;</button></div></div>
+            <div class="mock-matter-row"><div class="mmr-left"><div class="mmr-name">Estate of J. Marion &mdash; Probate</div><div class="mmr-client">Marion Estate</div></div><div style="display:flex;align-items:center;gap:12px;"><div class="mmr-hours">3.8h today</div><button class="mmr-switch">Switch &rarr;</button></div></div>
+            <div class="mock-matter-row"><div class="mmr-left"><div class="mmr-name">Nguyen IP Dispute &mdash; Research</div><div class="mmr-client">Nguyen Technologies</div></div><div style="display:flex;align-items:center;gap:12px;"><div class="mmr-hours">0.0h today</div><button class="mmr-switch">Switch &rarr;</button></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02: Invoice Builder -->
+    <div class="features-grid flip reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">02</div>
+        <h3 class="feature-title">Invoices That Write Themselves</h3>
+        <p class="feature-desc">Pull all unbilled time from any matter, apply the correct rates automatically, clean up descriptions, write off as needed &mdash; and send a polished, branded invoice in minutes.</p>
+        <ul class="feature-bullets">
+          <li>Automatic rate application per timekeeper and matter</li>
+          <li>Write-off and write-up with reason tracking</li>
+          <li>Branded PDF invoices with your firm's letterhead</li>
+          <li>LEDES e-billing format for corporate clients</li>
+          <li>One-click send with built-in payment link</li>
+        </ul>
+      </div>
+      <div class="mockup-invoice">
+        <div class="inv-header"><div><div class="inv-firm-name">Walsh &amp; Partners LLP</div><div class="inv-firm-sub">123 Legal Ave, Suite 400 &middot; New York, NY</div></div><div class="inv-badge">Invoice #2024-0182</div></div>
+        <div class="inv-meta"><div><div class="inv-meta-label">Bill To</div><div class="inv-meta-val">TechCorp Inc.</div></div><div><div class="inv-meta-label">Matter</div><div class="inv-meta-val">TechCorp Acquisition</div></div><div><div class="inv-meta-label">Due Date</div><div class="inv-meta-val">Mar 15, 2026</div></div></div>
+        <div class="inv-line-header"><span>Description</span><span style="text-align:center">Hrs</span><span>Rate</span><span style="text-align:right">Amount</span></div>
+        <div class="inv-line"><div class="inv-line-desc">M&amp;A due diligence review<br><span style="font-size:9px;color:var(--mid)">M. Reyes &middot; Partner</span></div><div class="inv-line-hrs">12.2</div><div class="inv-line-rate">$750/hr</div><div class="inv-line-amt">$9,150</div></div>
+        <div class="inv-line"><div class="inv-line-desc">Contract drafting &amp; review<br><span style="font-size:9px;color:var(--mid)">S. Chen &middot; Associate</span></div><div class="inv-line-hrs">8.6</div><div class="inv-line-rate">$380/hr</div><div class="inv-line-amt">$3,268</div></div>
+        <div class="inv-line"><div class="inv-line-desc">Document preparation<br><span style="font-size:9px;color:var(--mid)">L. Torres &middot; Paralegal</span></div><div class="inv-line-hrs">4.0</div><div class="inv-line-rate">$120/hr</div><div class="inv-line-amt">$480</div></div>
+        <div class="inv-totals"><div class="inv-total-row"><div class="inv-total-label">Subtotal</div><div class="inv-total-val">$12,898</div></div><div class="inv-total-row"><div class="inv-total-label" style="color:var(--red)">Write-off (courtesy)</div><div class="inv-total-val" style="color:var(--red)">&minus;$398</div></div><div class="inv-total-row main"><div class="inv-total-label" style="color:var(--black)">Total Due</div><div class="inv-total-val" style="color:var(--amber)">$12,500</div></div></div>
+      </div>
+    </div>
+
+    <!-- 03: Roles & Rates -->
+    <div class="features-grid reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">03</div>
+        <h3 class="feature-title">Every Attorney, Their Own Rate &amp; Role</h3>
+        <p class="feature-desc">Each person on your team has their own secure login, billing rate, and access level. Partners see everything. Associates see their own matters. Everyone works in their lane.</p>
+        <ul class="feature-bullets">
+          <li>Individual login for every attorney, associate, and paralegal</li>
+          <li>Default rates that override per client or matter automatically</li>
+          <li>Role-based access &mdash; attorneys only see their assigned matters</li>
+          <li>Managing partner visibility across all timekeepers and matters</li>
+          <li>Full audit trail of every time entry and change</li>
+        </ul>
+      </div>
+      <div class="mockup-roles">
+        <div class="roles-header"><div class="roles-title">Timekeepers &amp; Rates</div><button class="roles-add-btn">+ Add Timekeeper</button></div>
+        <div class="roles-th"><span>Name</span><span>Role</span><span>Default Rate</span><span>Access Level</span><span>Matters</span></div>
+        <div class="roles-row"><div class="role-person"><div class="role-avatar" style="background:#1a1a1a">JW</div><div><div class="role-name">James Walsh</div><div class="role-email">j.walsh@firm.com</div></div></div><div><span class="role-badge partner">Partner</span></div><div class="role-rate">$750 / hr</div><div class="role-access">Full Access</div><div class="role-matters">All</div></div>
+        <div class="roles-row"><div class="role-person"><div class="role-avatar" style="background:var(--amber)">MR</div><div><div class="role-name">Maria Reyes</div><div class="role-email">m.reyes@firm.com</div></div></div><div><span class="role-badge partner">Partner</span></div><div class="role-rate">$750 / hr</div><div class="role-access">Full Access</div><div class="role-matters">All</div></div>
+        <div class="roles-row"><div class="role-person"><div class="role-avatar" style="background:#3a7a6a">SC</div><div><div class="role-name">Sophie Chen</div><div class="role-email">s.chen@firm.com</div></div></div><div><span class="role-badge associate">Associate</span></div><div class="role-rate">$380 / hr</div><div class="role-access">Own Matters</div><div class="role-matters">7</div></div>
+        <div class="roles-row"><div class="role-person"><div class="role-avatar" style="background:#3a5a8a">LT</div><div><div class="role-name">Luis Torres</div><div class="role-email">l.torres@firm.com</div></div></div><div><span class="role-badge paralegal">Paralegal</span></div><div class="role-rate">$120 / hr</div><div class="role-access">Own Matters</div><div class="role-matters">4</div></div>
+      </div>
+    </div>
+
+    <!-- 04: Matter Management -->
+    <div class="features-grid flip reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">04</div>
+        <h3 class="feature-title">Matters Organized, Attorneys Aligned</h3>
+        <p class="feature-desc">Organize all work around a Client &rarr; Matter hierarchy. Track status, assign timekeepers, store notes and documents &mdash; and find anything in seconds.</p>
+        <ul class="feature-bullets">
+          <li>Client-matter hierarchy with unlimited nesting</li>
+          <li>Status tracking: Active, Pending, Closed, On Hold</li>
+          <li>Assign multiple timekeepers per matter</li>
+          <li>Matter-level notes and document storage</li>
+          <li>Quick-filter by client, status, or assigned attorney</li>
+        </ul>
+      </div>
+      <div class="mockup-matters">
+        <div class="matters-toolbar"><div class="matters-search-wrap"><input type="text" placeholder="Search matters..." readonly></div><button class="matters-new-btn">+ New Matter</button></div>
+        <div class="matters-th"><span>Matter</span><span>Client</span><span>Status</span><span>Attorneys</span><span>Unbilled</span></div>
+        <div class="matter-row"><div><div class="matter-name">TechCorp Acquisition</div><div class="matter-sub">M&amp;A &middot; #2024-041</div></div><div class="matter-client-cell">TechCorp Inc.</div><div><span class="matter-status active">Active</span></div><div class="matter-avatars"><div class="matter-avatar" style="background:#1a1a1a">MR</div><div class="matter-avatar" style="background:#3a7a6a">SC</div><div class="matter-avatar" style="background:#3a5a8a">LT</div></div><div class="matter-hours">24.8h</div></div>
+        <div class="matter-row"><div><div class="matter-name">Hendricks v. Cole</div><div class="matter-sub">Litigation &middot; #2024-038</div></div><div class="matter-client-cell">Hendricks Family Trust</div><div><span class="matter-status active">Active</span></div><div class="matter-avatars"><div class="matter-avatar" style="background:#1a1a1a">JW</div><div class="matter-avatar" style="background:var(--amber)">AP</div></div><div class="matter-hours">18.2h</div></div>
+        <div class="matter-row"><div><div class="matter-name">Nguyen IP Dispute</div><div class="matter-sub">IP &middot; #2024-045</div></div><div class="matter-client-cell">Nguyen Technologies</div><div><span class="matter-status pending">Pending</span></div><div class="matter-avatars"><div class="matter-avatar" style="background:#3a7a6a">SC</div></div><div class="matter-hours">3.6h</div></div>
+        <div class="matter-row"><div><div class="matter-name">Estate of J. Marion</div><div class="matter-sub">Probate &middot; #2024-032</div></div><div class="matter-client-cell">Marion Estate</div><div><span class="matter-status active">Active</span></div><div class="matter-avatars"><div class="matter-avatar" style="background:var(--amber)">AP</div><div class="matter-avatar" style="background:#3a5a8a">LT</div></div><div class="matter-hours">7.4h</div></div>
+        <div class="matter-row"><div><div class="matter-name">Caldwell Real Estate Closing</div><div class="matter-sub">Real Estate &middot; #2023-118</div></div><div class="matter-client-cell">Caldwell Legal Group</div><div><span class="matter-status closed">Closed</span></div><div class="matter-avatars"><div class="matter-avatar" style="background:#1a1a1a">JW</div></div><div class="matter-hours">0.0h</div></div>
+      </div>
+    </div>
+
+    <!-- 05: Trust & IOLTA -->
+    <div class="features-grid reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">05</div>
+        <h3 class="feature-title">Trust &amp; IOLTA, Fully Compliant</h3>
+        <p class="feature-desc">Manage client retainers held in trust with full compliance. Track deposits, disbursements, and replenishment &mdash; with three-way bank reconciliation built in.</p>
+        <ul class="feature-bullets">
+          <li>Client trust ledger with running balance</li>
+          <li>Deposit and disbursement tracking with full audit trail</li>
+          <li>Automatic replenishment alerts when balance drops</li>
+          <li>Three-way reconciliation: client ledger vs. trust account vs. bank</li>
+          <li>Separate operating and trust account views</li>
+        </ul>
+      </div>
+      <div class="mockup-trust">
+        <div class="trust-header"><div class="trust-header-title">&#x1F3E6; Trust Account &mdash; IOLTA</div><div class="trust-account-badge">Reconciled</div></div>
+        <div class="trust-balance-card"><div><div class="trust-bal-label">Client Trust Balance</div><div class="trust-bal-amount">$15,000.00</div><div class="trust-bal-client">Hendricks Family Trust &middot; Retainer</div></div><div class="trust-recon"><div style="font-size:18px;margin-bottom:2px;">&#x2705;</div><div class="trust-recon-text">3-Way Match</div></div></div>
+        <div class="trust-ledger">
+          <div class="trust-ledger-title">Recent Transactions</div>
+          <div class="trust-txn"><div><div class="trust-txn-desc">Retainer deposit received</div><div class="trust-txn-date">Feb 3, 2026</div></div><div class="trust-txn-amount credit">+$10,000.00</div></div>
+          <div class="trust-txn"><div><div class="trust-txn-desc">Invoice #2024-0178 &mdash; applied from trust</div><div class="trust-txn-date">Feb 10, 2026</div></div><div class="trust-txn-amount debit">&minus;$3,200.00</div></div>
+          <div class="trust-txn"><div><div class="trust-txn-desc">Retainer replenishment</div><div class="trust-txn-date">Feb 12, 2026</div></div><div class="trust-txn-amount credit">+$5,000.00</div></div>
+          <div class="trust-txn"><div><div class="trust-txn-desc">Filing fee disbursement &mdash; Court of Appeals</div><div class="trust-txn-date">Feb 14, 2026</div></div><div class="trust-txn-amount debit">&minus;$500.00</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 06: Accounts Receivable -->
+    <div class="features-grid flip reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">06</div>
+        <h3 class="feature-title">Collections Without the Awkward Calls</h3>
+        <p class="feature-desc">Never lose track of what's owed. Aging reports, overdue alerts, and automatic reminders keep your collections on track.</p>
+        <ul class="feature-bullets">
+          <li>30/60/90/90+ day aging buckets at a glance</li>
+          <li>Automatic email reminders on overdue invoices</li>
+          <li>Payment posting against outstanding invoices</li>
+          <li>Client payment history and trends</li>
+          <li>Export aging reports for partner review</li>
+        </ul>
+      </div>
+      <div class="mockup-ar">
+        <div class="ar-header">&#x23F3; Accounts Receivable &mdash; Aging</div>
+        <div class="ar-buckets">
+          <div class="ar-bucket"><div class="ar-bucket-label">0&ndash;30 Days</div><div class="ar-bucket-amount">$42,800</div><div class="ar-bucket-count">6 invoices</div></div>
+          <div class="ar-bucket"><div class="ar-bucket-label">31&ndash;60 Days</div><div class="ar-bucket-amount">$18,400</div><div class="ar-bucket-count">3 invoices</div></div>
+          <div class="ar-bucket warn"><div class="ar-bucket-label">61&ndash;90 Days</div><div class="ar-bucket-amount">$7,200</div><div class="ar-bucket-count">2 invoices</div></div>
+          <div class="ar-bucket danger"><div class="ar-bucket-label">90+ Days</div><div class="ar-bucket-amount">$3,100</div><div class="ar-bucket-count">1 invoice</div></div>
+        </div>
+        <div class="ar-overdue-header"><span>Client / Invoice</span><span>Amount</span><span>Days</span><span>Action</span></div>
+        <div class="ar-overdue-row"><div><div class="ar-client-name">Nguyen Technologies</div><div class="ar-inv-num">#2024-0165</div></div><div class="ar-amount">$3,100</div><div class="ar-days danger">97 days</div><div><button class="ar-remind-btn">Send Reminder</button></div></div>
+        <div class="ar-overdue-row"><div><div class="ar-client-name">Morrison Group LLC</div><div class="ar-inv-num">#2024-0171</div></div><div class="ar-amount">$4,800</div><div class="ar-days warn">68 days</div><div><button class="ar-remind-btn">Send Reminder</button></div></div>
+        <div class="ar-overdue-row"><div><div class="ar-client-name">Blackstone Holdings</div><div class="ar-inv-num">#2024-0174</div></div><div class="ar-amount">$2,400</div><div class="ar-days warn">62 days</div><div><button class="ar-remind-btn">Send Reminder</button></div></div>
+      </div>
+    </div>
+
+    <!-- 07: Reporting & Analytics -->
+    <div class="features-grid reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">07</div>
+        <h3 class="feature-title">The Numbers That Actually Matter</h3>
+        <p class="feature-desc">Track utilization, realization, matter profitability, and firm-wide financials &mdash; all from one dashboard, updated in real time.</p>
+        <ul class="feature-bullets">
+          <li>Utilization rate by timekeeper with target benchmarks</li>
+          <li>Realization rate tracking (billed vs. collected)</li>
+          <li>Matter profitability analysis by practice area</li>
+          <li>Revenue trend charts (monthly, quarterly, annual)</li>
+          <li>Export to PDF or CSV for partner meetings</li>
+        </ul>
+      </div>
+      <div class="mockup-analytics">
+        <div class="analytics-header"><div class="analytics-header-title">&#x1F4C8; Firm Analytics</div><div class="analytics-period">Feb 2026</div></div>
+        <div class="analytics-kpis">
+          <div class="analytics-kpi"><div class="analytics-kpi-label">Utilization Rate</div><div class="analytics-kpi-val">78%</div><div class="analytics-kpi-sub up">&uarr; 4% vs Jan</div></div>
+          <div class="analytics-kpi"><div class="analytics-kpi-label">Realization Rate</div><div class="analytics-kpi-val" style="color:var(--amber)">91%</div><div class="analytics-kpi-sub up">&uarr; 2% vs Jan</div></div>
+          <div class="analytics-kpi"><div class="analytics-kpi-label">Revenue MTD</div><div class="analytics-kpi-val" style="color:var(--green)">$142,800</div><div class="analytics-kpi-sub up">&uarr; 12% vs Jan</div></div>
+        </div>
+        <div class="analytics-chart">
+          <div class="analytics-chart-title">Utilization by Attorney</div>
+          <div class="chart-bar-row"><div class="chart-bar-label">J. Walsh</div><div class="chart-bar-track"><div class="chart-bar-fill high" style="width:88%"></div><div class="chart-bar-target" style="left:80%"></div></div><div class="chart-bar-val">88%</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">M. Reyes</div><div class="chart-bar-track"><div class="chart-bar-fill high" style="width:82%"></div><div class="chart-bar-target" style="left:80%"></div></div><div class="chart-bar-val">82%</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">S. Chen</div><div class="chart-bar-track"><div class="chart-bar-fill mid" style="width:74%"></div><div class="chart-bar-target" style="left:80%"></div></div><div class="chart-bar-val">74%</div></div>
+          <div class="chart-bar-row"><div class="chart-bar-label">A. Park</div><div class="chart-bar-track"><div class="chart-bar-fill low" style="width:61%"></div><div class="chart-bar-target" style="left:80%"></div></div><div class="chart-bar-val">61%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 08: Client Portal -->
+    <div class="features-grid flip reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">08</div>
+        <h3 class="feature-title">A Portal Your Clients Will Actually Use</h3>
+        <p class="feature-desc">Give your clients a professional, self-service view of their invoices and payment history. They can review, download, and pay &mdash; without a single email to your admin.</p>
+        <ul class="feature-bullets">
+          <li>Branded portal with your firm's logo and colors</li>
+          <li>Read-only view of all invoices and payment history</li>
+          <li>One-click online payment via credit card or ACH</li>
+          <li>Download invoice PDFs at any time</li>
+          <li>Secure login with email verification</li>
+        </ul>
+      </div>
+      <div class="mockup-portal">
+        <div class="portal-header"><div class="portal-firm-name">&#x2696; Walsh &amp; Partners LLP</div><div class="portal-user">Client Portal</div></div>
+        <div class="portal-welcome">Welcome back, TechCorp Inc.<div class="portal-welcome-sub">3 invoices &middot; 1 payment due</div></div>
+        <div class="portal-invoices">
+          <div class="portal-invoice"><div><div class="portal-inv-num">Invoice #2024-0182</div><div class="portal-inv-date">Feb 15, 2026 &middot; TechCorp Acquisition</div></div><div class="portal-inv-right"><div class="portal-inv-amount">$12,500</div><span class="portal-inv-status outstanding">Outstanding</span><button class="portal-pay-btn">Pay Now</button></div></div>
+          <div class="portal-invoice"><div><div class="portal-inv-num">Invoice #2024-0171</div><div class="portal-inv-date">Jan 15, 2026 &middot; TechCorp Acquisition</div></div><div class="portal-inv-right"><div class="portal-inv-amount">$9,800</div><span class="portal-inv-status paid">Paid</span></div></div>
+          <div class="portal-invoice"><div><div class="portal-inv-num">Invoice #2024-0158</div><div class="portal-inv-date">Dec 15, 2025 &middot; TechCorp Acquisition</div></div><div class="portal-inv-right"><div class="portal-inv-amount">$14,200</div><span class="portal-inv-status paid">Paid</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 09: Integrations -->
+    <div class="features-grid reveal" style="margin-top: 80px;">
+      <div class="feature-text">
+        <div class="feature-number">09</div>
+        <h3 class="feature-title">Connects to Everything You Already Use</h3>
+        <p class="feature-desc">CounselTrack connects to the tools your firm already uses. Sync your calendar, push to QuickBooks, accept payments through LawPay &mdash; all without leaving the platform.</p>
+        <ul class="feature-bullets">
+          <li>QuickBooks sync for seamless accounting</li>
+          <li>Stripe and LawPay for payment processing</li>
+          <li>Outlook and Gmail calendar integration for time suggestions</li>
+          <li>LEDES e-billing format for corporate clients</li>
+          <li>Google Calendar sync for automatic time entry suggestions</li>
+        </ul>
+      </div>
+      <div class="mockup-integrations">
+        <div class="intg-header">&#x1F50C; Integrations</div>
+        <div class="intg-grid">
+          <div class="intg-card"><div class="intg-icon">&#x1F4BC;</div><div class="intg-info"><div class="intg-name">QuickBooks</div><div class="intg-desc">Sync invoices, payments, and expenses automatically</div></div><span class="intg-status connected">Connected</span></div>
+          <div class="intg-card"><div class="intg-icon">&#x1F4B3;</div><div class="intg-info"><div class="intg-name">Stripe</div><div class="intg-desc">Accept credit card and ACH payments online</div></div><span class="intg-status connected">Connected</span></div>
+          <div class="intg-card"><div class="intg-icon">&#x1F3E6;</div><div class="intg-info"><div class="intg-name">LawPay</div><div class="intg-desc">Trust-compliant payment processing for law firms</div></div><span class="intg-status available">Connect</span></div>
+          <div class="intg-card"><div class="intg-icon">&#x1F4E7;</div><div class="intg-info"><div class="intg-name">Outlook</div><div class="intg-desc">Calendar sync and suggested time entries from meetings</div></div><span class="intg-status connected">Connected</span></div>
+          <div class="intg-card"><div class="intg-icon">&#x1F4C5;</div><div class="intg-info"><div class="intg-name">Google Calendar</div><div class="intg-desc">Auto-suggest time entries based on your schedule</div></div><span class="intg-status available">Connect</span></div>
+          <div class="intg-card"><div class="intg-icon">&#x1F4D1;</div><div class="intg-info"><div class="intg-name">LEDES Export</div><div class="intg-desc">E-billing format for corporate and insurance clients</div></div><span class="intg-status connected">Enabled</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ========== HOW IT WORKS ========== -->
+<section id="how-it-works">
+  <div class="section-inner">
+    <div class="section-eyebrow">The Flow</div>
+    <h2 class="section-title">From first hour to collected payment<br>in six steps</h2>
+    <p class="section-desc">The entire billing lifecycle, automated at every stage that can be automated &mdash; and frictionless at every stage that can't.</p>
+    <div class="steps-grid">
+      <div class="step-item"><div class="step-num">1</div><div class="step-name">Log Time</div><div class="step-detail">One tap to start a timer. Switch matters on the fly. Reconstruct at day's end if needed.</div></div>
+      <div class="step-item"><div class="step-num">2</div><div class="step-name">Pre-bill Review</div><div class="step-detail">Review entries before billing. Clean descriptions, apply write-offs, approve time.</div></div>
+      <div class="step-item"><div class="step-num">3</div><div class="step-name">Generate Invoice</div><div class="step-detail">Rates apply automatically. Branded PDF built in seconds, ready to review.</div></div>
+      <div class="step-item"><div class="step-num">4</div><div class="step-name">Send to Client</div><div class="step-detail">Email delivery with pay link, or export as LEDES for e-billing clients.</div></div>
+      <div class="step-item"><div class="step-num">5</div><div class="step-name">Collect Payment</div><div class="step-detail">Online payment, trust drawdown, or check &mdash; all posted automatically to the invoice.</div></div>
+      <div class="step-item"><div class="step-num">6</div><div class="step-name">Reconcile</div><div class="step-detail">Syncs to QuickBooks. Realization rate calculated. Reports updated in real time.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TESTIMONIALS ========== -->
+<section id="testimonials">
+  <div class="section-inner">
+    <div class="section-eyebrow">From the Field</div>
+    <h2 class="section-title">What attorneys say</h2>
+    <div class="testimonials-grid reveal">
+      <div class="testimonial"><div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testimonial-quote">"We were losing 2&ndash;3 hours per attorney per week in unbilled time. CounselTrack cut that to almost nothing within the first month."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:#1a1a1a">JW</div><div><div class="testimonial-name">James Walsh</div><div class="testimonial-role">Managing Partner &middot; Walsh &amp; Partners LLP</div></div></div></div>
+      <div class="testimonial"><div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testimonial-quote">"The invoice builder alone is worth it. What used to take my billing admin half a day now takes twenty minutes. And the invoices look far more professional."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:var(--amber)">MR</div><div><div class="testimonial-name">Maria Reyes</div><div class="testimonial-role">Partner &middot; Caldwell Legal Group</div></div></div></div>
+      <div class="testimonial"><div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div><p class="testimonial-quote">"I do a lot of work on the go between court and client meetings. The mobile app makes it trivial to log time in real time instead of guessing later."</p><div class="testimonial-author"><div class="testimonial-avatar" style="background:#3a7a6a">AP</div><div><div class="testimonial-name">Angela Park</div><div class="testimonial-role">Associate &middot; Morrison Reyes PC</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PRICING ========== -->
+<section id="pricing">
+  <div class="section-inner">
+    <div class="section-eyebrow">Pricing</div>
+    <h2 class="section-title">Simple, per-seat pricing</h2>
+    <p class="section-desc">No setup fees. No contracts. Cancel anytime. All plans include a 30-day free trial.</p>
+    <div class="pricing-grid reveal">
+      <div class="pricing-card"><div class="pricing-tier">Solo</div><div class="pricing-price">$49</div><div class="pricing-period">/ month &middot; 1 attorney</div><ul class="pricing-features"><li>Time tracking &amp; timers</li><li>Client &amp; matter management</li><li>Invoice generation (PDF)</li><li>Basic reporting</li><li>Mobile app</li></ul><button class="pricing-btn">Start Free Trial</button></div>
+      <div class="pricing-card featured"><div class="pricing-tier">Firm</div><div class="pricing-price">$29</div><div class="pricing-period">/ seat / month &middot; 2&ndash;25 attorneys</div><ul class="pricing-features"><li>Everything in Solo</li><li>Role-based access control</li><li>LEDES e-billing export</li><li>Trust / IOLTA accounting</li><li>QuickBooks integration</li><li>Advanced analytics</li><li>Client payment portal</li></ul><button class="pricing-btn">Start Free Trial</button></div>
+      <div class="pricing-card"><div class="pricing-tier">Enterprise</div><div class="pricing-price">Custom</div><div class="pricing-period">25+ attorneys</div><ul class="pricing-features"><li>Everything in Firm</li><li>Multi-office support</li><li>Custom integrations</li><li>Dedicated support</li><li>SSO / SAML</li></ul><button class="pricing-btn">Contact Sales</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA ========== -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div class="section-eyebrow">Get Started</div>
+    <h2 class="cta-title">Ready to stop losing billable hours?</h2>
+    <p class="cta-desc">Join hundreds of law firms that have already made the switch. Get set up in under 10 minutes.</p>
+    <div class="cta-form"><input type="email" class="cta-input" placeholder="Your work email"><a href="#" class="btn-primary">Request Demo</a></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">CounselTrack</div>
+  <div class="footer-copy">&copy; 2026 CounselTrack. All rights reserved.</div>
+  <ul class="footer-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Security</a></li><li><a href="#">Contact</a></li></ul>
+</footer>
+
+<script>
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+
+// Animate timer
+let seconds = 8078;
+const timerEl = document.querySelector('.mat-timer');
+if (timerEl) {
+  setInterval(() => {
+    seconds++;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    timerEl.textContent = h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }, 1000);
+}
+
+// Animate nav timer
+let navSeconds = 5078;
+const navTimer = document.querySelector('.mock-timer-running');
+if (navTimer) {
+  setInterval(() => {
+    navSeconds++;
+    const h = Math.floor(navSeconds / 3600);
+    const m = Math.floor((navSeconds % 3600) / 60);
+    navTimer.innerHTML = '<div class="timer-pulse"></div>Hendricks v. Cole \u00b7 ' + h + 'h ' + String(m).padStart(2,'0') + 'm';
+  }, 1000);
+}
+
+// Animate chart bars on scroll
+const chartObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('.chart-bar-fill').forEach((bar, i) => {
+        const w = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(() => { bar.style.width = w; }, 150 * i);
+      });
+      chartObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.3 });
+const chart = document.querySelector('.analytics-chart');
+if (chart) chartObserver.observe(chart);
+</script>
+
+</body>
+</html>
