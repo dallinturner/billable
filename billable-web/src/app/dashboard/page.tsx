@@ -32,6 +32,7 @@ export default function DashboardPage() {
   const [taskTypes, setTaskTypes] = useState<TaskType[]>([])
   const [entries, setEntries] = useState<TimeEntry[]>([])
   const [activeTimer, setActiveTimer] = useState<ActiveTimer | null>(null)
+  const [pendingEditEntryIds, setPendingEditEntryIds] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(true)
 
   const [showNotesModal, setShowNotesModal] = useState(false)
@@ -55,7 +56,7 @@ export default function DashboardPage() {
     const myFirm = (firmData as Firm[])?.find((f) => f.id === profile.firm_id)
     setFirm(myFirm ?? null)
 
-    const [{ data: clientsData }, { data: taskTypesData }, { data: entriesData }] = await Promise.all([
+    const [{ data: clientsData }, { data: taskTypesData }, { data: entriesData }, { data: editRequestsData }] = await Promise.all([
       supabase.from('clients').select('*').eq('firm_id', profile.firm_id).eq('is_active', true),
       supabase.from('task_types').select('*').or(`firm_id.eq.${profile.firm_id},firm_id.is.null`).eq('is_active', true),
       supabase
@@ -63,11 +64,17 @@ export default function DashboardPage() {
         .select('*, client:clients(*), task_type:task_types(*)')
         .eq('user_id', authUser.id)
         .order('started_at', { ascending: false }),
+      supabase
+        .from('edit_requests')
+        .select('time_entry_id')
+        .eq('requested_by', authUser.id)
+        .eq('status', 'pending'),
     ])
 
     setClients((clientsData as Client[]) ?? [])
     setTaskTypes((taskTypesData as TaskType[]) ?? [])
     setEntries((entriesData as TimeEntry[]) ?? [])
+    setPendingEditEntryIds(new Set((editRequestsData ?? []).map((r: { time_entry_id: string }) => r.time_entry_id)))
 
     const active = (entriesData as TimeEntry[])?.find((e) => !e.ended_at && e.status === 'draft')
     if (active) {
@@ -332,6 +339,7 @@ export default function DashboardPage() {
                       billingIncrement={firm?.billing_increment ?? 0.1}
                       onUpdate={handleUpdateEntry}
                       onRequestEdit={setEditRequestEntry}
+                      hasPendingEdit={pendingEditEntryIds.has(entry.id)}
                     />
                   ))}
                 </div>

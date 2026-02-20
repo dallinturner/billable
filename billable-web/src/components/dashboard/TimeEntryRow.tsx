@@ -10,6 +10,7 @@ interface TimeEntryRowProps {
   billingIncrement: number
   onUpdate: (id: string, updates: Partial<TimeEntry>) => Promise<void>
   onRequestEdit: (entry: TimeEntry) => void
+  hasPendingEdit?: boolean
 }
 
 export default function TimeEntryRow({
@@ -18,6 +19,7 @@ export default function TimeEntryRow({
   billingIncrement: _billingIncrement,
   onUpdate,
   onRequestEdit,
+  hasPendingEdit = false,
 }: TimeEntryRowProps) {
   const [editing, setEditing] = useState(false)
   const [notes, setNotes] = useState(entry.notes ?? '')
@@ -73,6 +75,11 @@ export default function TimeEntryRow({
             ) : (
               <span className="text-xs bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20 px-2 py-0.5 rounded-full">
                 Draft
+              </span>
+            )}
+            {hasPendingEdit && (
+              <span className="text-xs bg-orange-50 dark:bg-orange-500/10 text-orange-700 dark:text-orange-400 border border-orange-200 dark:border-orange-500/20 px-2 py-0.5 rounded-full">
+                Edit requested
               </span>
             )}
           </div>
@@ -137,8 +144,13 @@ export default function TimeEntryRow({
               </button>
             ) : (
               <button
-                onClick={() => onRequestEdit(entry)}
-                className="text-xs text-gray-400 hover:text-gray-900 dark:hover:text-white transition font-medium"
+                onClick={() => !hasPendingEdit && onRequestEdit(entry)}
+                disabled={hasPendingEdit}
+                className={`text-xs font-medium transition ${
+                  hasPendingEdit
+                    ? 'text-gray-300 dark:text-gray-600 cursor-default'
+                    : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
               >
                 Request edit
               </button>
