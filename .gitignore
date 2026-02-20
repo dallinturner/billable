@@ -1,0 +1,13 @@
+.DS_Store
+*.docx
+Claude Prompts for Billable.docx
+
+# Extension build output
+extension/dist/
+extension/node_modules/
+extension/.env
+
+# Web app (has its own .gitignore but belt-and-suspenders)
+billable-web/.env.local
+billable-web/.next/
+billable-web/node_modules/
