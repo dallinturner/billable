@@ -4,21 +4,45 @@
 A billable hours tracking tool for lawyers and law firms. Solves the problem of lawyers losing revenue by missing billable hours. Built for solo practitioners and law firms of all sizes.
 
 ## Current Status
-- **Phase:** MVP fully built and verified end-to-end. Ready for polish and deployment.
-- **Last Session:** February 19, 2026
-- **Next Step:** UI polish pass (extension width + light/dark mode toggle), then test edit request flow, then deploy to Vercel.
+- **Phase:** MVP fully built, deployed, and live. Core flows tested end-to-end.
+- **Last Session:** February 20, 2026
+- **Next Step:** Test edit request flow end-to-end, then update extension WEBAPP_URL to production URL.
+
+## Live URLs
+- **Production:** https://billable-three.vercel.app
+- **Vercel Project:** https://vercel.com/dallin-turners-projects/billable
+- **GitHub Repo:** https://github.com/dallinturner/billable (public)
+
+## Deployment
+- Hosted on Vercel under "Dallin Turner's projects" team
+- GitHub auto-deploy IS connected (pushes to `main` trigger auto-deploy)
+- If auto-deploy ever fails, run manually from repo root:
+  ```bash
+  cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable"
+  vercel --prod --scope dallin-turners-projects
+  ```
+- Vercel project name: `billable` (NOT `billable-web` — that was an old failed project)
+- Root directory in Vercel is set to `billable-web`
+- Environment variables set in Vercel dashboard (Production + Preview + Development):
+  - `NEXT_PUBLIC_SUPABASE_URL`
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- **Important:** When adding env vars via Vercel dashboard UI, paste carefully — the anon key previously got a newline injected mid-value which broke auth. Use CLI instead:
+  ```bash
+  echo "value" | vercel env add KEY production --scope dallin-turners-projects
+  ```
 
 ## Tech Stack
 - **Framework:** Next.js 16 (App Router) + TypeScript
 - **Database & Auth:** Supabase (PostgreSQL + Supabase Auth)
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS v4 (class-based dark mode via `@custom-variant dark`)
 - **Browser Extension:** Chrome Extension (Manifest V3) + React + Webpack
 - **Voice-to-text:** Web Speech API (built into Chrome, free)
 
 ## Supabase Project
 - **URL:** https://pzdbsnrxnpszvznrlftc.supabase.co
-- **Anon key:** stored in `billable-web/.env.local`
+- **Anon key:** stored in `billable-web/.env.local` (local) and Vercel env vars (production)
 - **Email confirmations:** disabled (turned off in Auth > Providers > Email)
+- **Auth redirect URLs:** https://billable-three.vercel.app added to allowed URLs
 
 ## What Has Been Built
 
@@ -27,6 +51,15 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 - **Supabase client** set up in `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server)
 - **Types** defined in `src/types/database.ts` (Firm, User, Client, TaskType, TimeEntry, EditRequest)
 - **Time utilities** in `src/lib/time.ts` (rounding, formatting, grouping)
+- **ThemeProvider** in `src/components/ThemeProvider.tsx` — React context, persists to localStorage, applies `.dark` class to `<html>`
+
+**Design System**
+- Monochrome — no indigo/blue accents anywhere
+- Navbar: always `bg-gray-950` (dark), regardless of theme
+- Light mode: white/gray-50 backgrounds, gray-900 text
+- Dark mode: gray-950/gray-900 backgrounds, white text
+- Client lists use initials avatars + SVG chevrons (matching extension style)
+- `@custom-variant dark (&:where(.dark, .dark *))` in globals.css enables class-based dark mode
 
 **Auth**
 - `/auth/login` — email/password login with role-based redirect (admin → /admin, lawyer/individual → /dashboard)
@@ -35,14 +68,22 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 - `src/middleware.ts` — protects `/dashboard` and `/admin` routes, redirects unauthenticated users to login
 
 **Lawyer Dashboard (`/dashboard`)**
-- Live timer card with elapsed counter (`TimerCard.tsx`)
-- One-click client grid to start timers
+- Live timer card with elapsed counter (`TimerCard.tsx`) — always dark bg-gray-950
+- One-click client grid with initials avatars to start timers
 - Stop / Switch Client buttons → open notes popup
 - Notes popup (`NotesModal.tsx`) with task type dropdown + voice-to-text (Web Speech API)
 - Full entry history grouped by date (`TimeEntryRow.tsx`) with inline editing of draft entries
+- "Edit requested" orange badge on submitted entries with a pending edit request
+- "Request edit" button disabled when a pending edit request already exists
 - Manual entry form (`ManualEntryForm.tsx`) for after-the-fact time entries
 - "Submit all" button to push all draft entries to admin
 - Edit request modal (`EditRequestModal.tsx`) for requesting changes to submitted entries
+- Navbar shows: Dashboard + Settings links (role="individual" hardcoded — prevents admin users from seeing admin nav)
+
+**Lawyer Settings (`/dashboard/settings`)**
+- Appearance section: light/dark mode toggle
+- Profile section: update display name
+- Email shown (pulled from authUser.email, not User type)
 
 **Admin Dashboard (`/admin`)**
 - Stats overview: submitted entries, billable hours, lawyer count, pending edit requests
@@ -55,9 +96,10 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 - Add/deactivate clients and matters
 - Add/deactivate task types
 - Team member list and invite flow
+- Appearance section: light/dark mode toggle
 
 **Shared**
-- `Navbar.tsx` — top nav with sign out, links to admin/dashboard based on role
+- `Navbar.tsx` — top nav with sign out. Shows admin links when `role="admin"`, lawyer links when `role="individual"`
 
 ### Database (`/billable-web/supabase/migrations/001_initial_schema.sql`)
 - **Fully migrated to Supabase** — all tables created and verified
@@ -69,6 +111,16 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 - **Note:** RLS is disabled on `firms` table (was blocking signup flow — see known issues below)
 - Indexes on all FK and commonly filtered columns
 
+**RLS Fix Applied (Feb 20):**
+The `time_entries` update policy was missing a `WITH CHECK` clause, causing `Submit all` to silently fail. Fixed by running:
+```sql
+DROP POLICY "Users can update own draft entries" ON time_entries;
+CREATE POLICY "Users can update own draft entries"
+  ON time_entries FOR UPDATE
+  USING (user_id = auth.uid() AND status = 'draft')
+  WITH CHECK (user_id = auth.uid());
+```
+
 ### Browser Extension (`/extension`)
 - `manifest.json` — Manifest V3, permissions: storage + alarms
 - `src/background.ts` — service worker, persists timer state across popup close via `chrome.storage.local`
@@ -76,7 +128,8 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 - `src/supabase.ts` — Supabase client using `chrome.storage.local` for auth token persistence
 - `src/types.ts` — shared TypeScript types for the extension
 - `webpack.config.js` — bundles React + TypeScript for the extension
-- **Status:** Code written, dependencies installed. Not yet built or loaded into Chrome.
+- **Status:** Built and tested end-to-end. Needs `WEBAPP_URL` updated to production URL before distributing.
+- **Extension design:** Dark `bg-gray-950` header, client initials avatars, SVG chevrons, `w-64` width
 
 ## Known Issues / In Progress
 
@@ -85,50 +138,56 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 - **Fix applied:** Created a `handle_signup()` Postgres function with `SECURITY DEFINER` that creates both the firm and user profile atomically, bypassing RLS. Signup page now calls `supabase.rpc('handle_signup', ...)` instead of doing two separate inserts.
 - **Remaining:** RLS is still disabled on `firms` table. Low risk (firms table only has name + billing_increment), but could re-enable with a permissive policy once the SECURITY DEFINER flow is the only write path.
 
-### 2. Extension UI is narrow and needs polish
-- The popup is functional but visually cramped
-- Planned fix: widen the popup, improve layout and spacing
-- Will be done in the same pass as the light/dark mode work
-
-### 3. Middleware deprecation warning
+### 2. Middleware deprecation warning
 - Next.js 16 shows: `The "middleware" file convention is deprecated. Please use "proxy" instead.`
 - Not breaking, but will need to rename `src/middleware.ts` → `src/proxy.ts` eventually
+
+### 3. Lawyer invite flow is placeholder
+- Admin Settings shows a team member list and an "Invite" button
+- Currently just shows a flash message — does not actually send an email invite
+- Real fix: use Supabase's `auth.admin.inviteUserByEmail()` via a server action, or send a magic link
 
 ## Remaining Steps
 
 - [x] Fix signup bug (handle_signup SECURITY DEFINER function)
-- [x] End-to-end test core web app loop:
-  - Sign up as firm admin ✅
-  - Add clients in settings ✅
-  - Start/stop timer on lawyer dashboard ✅
-  - Fill notes popup, save draft entry ✅
-  - Submit draft → appears in admin dashboard with notes ✅
-- [x] Build and load browser extension into Chrome
-- [x] End-to-end test extension loop:
-  - Sign in via extension login form ✅
-  - Start timer from client list ✅
-  - Stop timer, fill notes ✅
-  - Confirm draft entry appears in lawyer dashboard ✅
-  - Submit → confirm appears in admin dashboard ✅
-- [ ] **UI polish pass** (do these together):
-  - Add light/dark mode toggle (user preference, persisted) — white/black themes
-  - Fix extension popup width and layout
-  - General spacing and visual cleanup
-- [ ] Test edit request flow end-to-end:
+- [x] End-to-end test core web app loop ✅
+- [x] Build and load browser extension into Chrome ✅
+- [x] End-to-end test extension loop ✅
+- [x] UI polish pass:
+  - Light/dark mode toggle (persisted in localStorage) ✅
+  - Full web app redesign — monochrome, no indigo ✅
+  - Extension redesigned — dark header, initials avatars, SVG chevrons ✅
+  - Dark mode toggle moved to Settings pages (lawyer + admin) ✅
+  - Lawyer settings page created at `/dashboard/settings` ✅
+- [x] Fix Submit all bug (RLS WITH CHECK clause) ✅
+- [x] Add "Edit requested" badge to lawyer dashboard ✅
+- [x] Deploy web app to Vercel ✅ → https://billable-three.vercel.app
+- [ ] **Test edit request flow end-to-end:**
   - Lawyer clicks "Request edit" on a submitted entry
   - Admin sees it in the Edit Requests tab
   - Admin approves/denies and changes apply
+  - Verify "Edit requested" badge clears after admin resolves it
+- [ ] Update extension `.env` `WEBAPP_URL` to `https://billable-three.vercel.app`
+- [ ] Fix lawyer invite flow (currently placeholder — needs real email invite via Supabase)
 - [ ] Fix middleware deprecation warning (rename `src/middleware.ts` → `src/proxy.ts`)
-- [ ] Deploy web app to Vercel
-- [ ] Update extension `.env` `WEBAPP_URL` to production URL before distributing
 
 ## How to Resume Development
 
-### Start the web app
+### Start the web app locally
 ```bash
 cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable/billable-web"
 npm run dev
 # Opens at http://localhost:3000
+```
+
+### Deploy to production
+```bash
+cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable"
+git add -p
+git commit -m "your message"
+git push
+# Vercel auto-deploys from GitHub push
+# If auto-deploy fails, run: vercel --prod --scope dallin-turners-projects
 ```
 
 ### Rebuild the extension after code changes
@@ -139,8 +198,9 @@ npm run build
 ```
 
 ### Test accounts
-- Admin account is whatever you signed up with at http://localhost:3000/auth/signup
-- To add a lawyer account: sign up with a new email at /auth/signup, select "Individual", then manually update their `firm_id` in Supabase Table Editor → users to match your firm's ID
+- **Admin:** your main signup account at https://billable-three.vercel.app
+- **Lawyer:** signed up with `yourname+lawyer@gmail.com`, role "Individual", `firm_id` manually set in Supabase Table Editor to match admin's firm_id
+- To create more lawyer accounts: same process — sign up as Individual, set firm_id in Supabase
 
 ### Supabase
 - Dashboard: https://supabase.com/dashboard/project/pzdbsnrxnpszvznrlftc
@@ -156,13 +216,16 @@ Billable/
 │   ├── src/
 │   │   ├── app/
 │   │   │   ├── page.tsx           # Root redirect
+│   │   │   ├── layout.tsx         # Root layout with ThemeProvider + FOUC script
+│   │   │   ├── globals.css        # Tailwind v4 + @custom-variant dark
 │   │   │   ├── auth/login/        # Login page
 │   │   │   ├── auth/signup/       # Signup page
 │   │   │   ├── auth/callback/     # Supabase auth callback
-│   │   │   ├── dashboard/         # Lawyer dashboard
+│   │   │   ├── dashboard/         # Lawyer dashboard + settings
 │   │   │   └── admin/             # Admin dashboard + settings
 │   │   ├── components/
-│   │   │   ├── Navbar.tsx
+│   │   │   ├── Navbar.tsx         # Always dark header, role-based nav links
+│   │   │   ├── ThemeProvider.tsx  # React context for light/dark mode
 │   │   │   ├── dashboard/         # TimerCard, TimeEntryRow, NotesModal, etc.
 │   │   │   └── admin/             # FilterBar, EntriesTable, EditRequestCard
 │   │   ├── lib/
@@ -174,10 +237,10 @@ Billable/
 └── extension/                     # Chrome extension
     ├── manifest.json
     ├── src/
-    │   ├── popup.tsx
-    │   ├── background.ts
-    │   ├── supabase.ts
-    │   └── types.ts
+    │   ├── popup.tsx              # Full React UI
+    │   ├── background.ts          # Service worker / timer persistence
+    │   ├── supabase.ts            # Supabase client for extension
+    │   └── types.ts               # TypeScript types
     └── webpack.config.js
 ```
 
