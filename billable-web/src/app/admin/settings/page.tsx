@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
 import { useTheme } from '@/components/ThemeProvider'
+import { inviteLawyer } from './actions'
 import type { Client, TaskType, User, Firm } from '@/types/database'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -108,9 +109,14 @@ export default function AdminSettingsPage() {
     e.preventDefault()
     if (!newLawyerEmail.trim() || !newLawyerName.trim() || !firm) return
     setSaving(true)
-    flash(`Share the signup link with ${newLawyerEmail}. They should sign up and you'll need to update their firm_id.`)
-    setNewLawyerEmail('')
-    setNewLawyerName('')
+    const { error } = await inviteLawyer(newLawyerEmail.trim(), newLawyerName.trim(), firm.id)
+    if (error) flash(error, true)
+    else {
+      flash(`Invite sent to ${newLawyerEmail}`)
+      setNewLawyerEmail('')
+      setNewLawyerName('')
+      await loadData()
+    }
     setSaving(false)
   }
 
