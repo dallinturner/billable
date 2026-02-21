@@ -210,6 +210,7 @@ export default function DashboardPage() {
     })
 
     setEditRequestEntry(null)
+    await loadData()
   }
 
   const activeClient = clients.find((c) => c.id === activeTimer?.clientId)
