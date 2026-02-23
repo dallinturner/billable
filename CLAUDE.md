@@ -3,213 +3,199 @@
 ## What This Product Is
 A billable hours tracking tool for lawyers and law firms. Solves the problem of lawyers losing revenue by missing billable hours. Built for solo practitioners and law firms of all sizes.
 
-## Current Status
-- **Phase:** MVP fully built, deployed, and live. Core flows tested end-to-end.
-- **Last Session:** February 23, 2026
-- **Next Step:** Confirm invite email arrives in lawyer's inbox. Then fix middleware deprecation warning (rename `src/middleware.ts` → `src/proxy.ts`).
+---
 
-## Live URLs
+## Session Log
+
+### February 23, 2026
+**Goal:** Debug and fully fix lawyer invite flow. Improve UX.
+
+**What we did:**
+- Debugged why invite form was silently failing — Vercel's GitHub auto-deploy had stopped triggering. Fixed by deploying manually with `vercel --prod --scope dallin-turners-projects`. Root cause: GitHub integration had quietly broken.
+- Fixed toast/flash notifications — were rendering in the page flow (invisible when scrolled down). Switched to inline `position: fixed` styles so they always appear at the top of the viewport regardless of scroll position. Applied to both `/admin/settings` and `/dashboard/settings`.
+- Discovered invite was failing with "Database error saving new user" — caused by the `on_auth_user_created` trigger conflicting with Supabase's auth user creation. Dropped the trigger and updated the server action to directly insert into `public.users` using the admin client after `inviteUserByEmail` succeeds.
+- Fixed middleware intercepting `/auth/callback` when user was already logged in as admin — the middleware was redirecting admins to `/admin` before the callback could run. Added exception for `/auth/callback`.
+- Fixed callback reading stale admin session — removed role check from `/auth/callback`, now always redirects to `/dashboard`. Moved admin redirect logic to middleware (admins hitting `/dashboard` get sent to `/admin`).
+- Fixed invite link landing on wrong page — Supabase invite emails use **implicit flow** (hash fragment tokens: `#access_token=...`) not PKCE code flow. Our server-side callback can't read hash fragments. Created new client-side page at `/auth/confirm` that reads hash params, calls `supabase.auth.setSession()`, and redirects to `/dashboard`. Updated `redirectTo` in server action to point to `/auth/confirm`. Added `/auth/confirm` to Supabase allowed redirect URLs.
+- Fixed Supabase Site URL — was set to old deployment URL `https://billable-web-seven.vercel.app`. Updated to `https://billable-three.vercel.app`.
+- **Invite flow fully working end-to-end** ✅ — admin invites lawyer, email arrives, lawyer clicks link, lands on lawyer dashboard.
+- Added lawyer stats dashboard to future features list.
+
+**Files changed:**
+- `src/app/admin/settings/actions.ts` — drop trigger approach, insert profile directly; point redirectTo to /auth/confirm
+- `src/app/admin/settings/page.tsx` — fixed toast positioning with inline styles
+- `src/app/dashboard/settings/page.tsx` — fixed toast positioning with inline styles
+- `src/app/auth/confirm/page.tsx` — NEW: client page to handle implicit flow invite tokens
+- `src/app/auth/callback/route.ts` — removed role check, always redirect to /dashboard
+- `src/middleware.ts` — exclude /auth/callback and /auth/confirm from auth redirect; redirect admins from /dashboard to /admin
+
+**Supabase changes:**
+- Dropped `on_auth_user_created` trigger and `handle_new_user()` function
+- Updated Site URL to `https://billable-three.vercel.app`
+- Added `https://billable-three.vercel.app/auth/confirm` to allowed redirect URLs
+
+---
+
+### February 22, 2026
+**Goal:** Test edit request flow, update extension URL, start lawyer invite flow.
+
+**What we did:**
+- Fixed bug in edit request flow — `handleEditRequest` in `dashboard/page.tsx` wasn't calling `loadData()` after inserting the edit request, so the "Edit requested" badge didn't appear until manual page refresh. Added `await loadData()` after insert.
+- Tested edit request flow end-to-end ✅ — lawyer requests edit, badge appears immediately, admin sees it in Edit Requests tab, approve/deny works, badge clears after resolution.
+- Updated extension `WEBAPP_URL` from `http://localhost:3000` to `https://billable-three.vercel.app` in `extension/.env`. Rebuilt extension with `npm run build`. Tested end-to-end ✅.
+- Implemented real lawyer invite flow:
+  - Created `src/lib/supabase/admin.ts` — Supabase client using service role key
+  - Created `src/app/admin/settings/actions.ts` — server action calling `auth.admin.inviteUserByEmail()` with `full_name`, `firm_id`, `role` metadata
+  - Added `SUPABASE_SERVICE_ROLE_KEY` to `billable-web/.env.local` and Vercel production env vars (via CLI)
+  - Created `on_auth_user_created` Postgres trigger to auto-create `users` row on invite (later dropped Feb 23 — caused errors)
+  - Added error handling to surface invite failures (was previously failing silently)
+
+**Files changed:**
+- `src/app/dashboard/page.tsx` — added `await loadData()` after edit request insert
+- `src/lib/supabase/admin.ts` — NEW: service role admin client
+- `src/app/admin/settings/actions.ts` — NEW: `inviteLawyer` server action
+- `src/app/admin/settings/page.tsx` — wired up real invite handler
+
+**Supabase changes (Feb 22, later rolled back Feb 23):**
+- Created `handle_new_user()` function and `on_auth_user_created` trigger (dropped next session)
+
+---
+
+### February 20, 2026
+**Goal:** Complete MVP — fix remaining bugs, polish UI, deploy.
+
+**What we did:**
+- Fixed signup bug — client-side inserts to `firms` and `users` were failing because `auth.uid()` wasn't available in RLS context immediately after `signUp()`. Created `handle_signup()` Postgres function with `SECURITY DEFINER` that creates both firm and user profile atomically. Signup page now calls `supabase.rpc('handle_signup', ...)`.
+- Fixed "Submit all" bug — `time_entries` UPDATE policy was missing a `WITH CHECK` clause, causing submits to silently fail. Fixed by dropping and recreating the policy with `WITH CHECK (user_id = auth.uid())`.
+- Added "Edit requested" orange badge to submitted entries with pending edit requests on the lawyer dashboard.
+- Full UI polish pass:
+  - Light/dark mode toggle persisted in localStorage
+  - Full web app redesign — monochrome, no indigo/blue anywhere
+  - Extension redesigned — dark `bg-gray-950` header, initials avatars, SVG chevrons
+  - Dark mode toggle moved to Settings pages (lawyer + admin)
+  - Lawyer settings page created at `/dashboard/settings`
+- End-to-end tested core web app loop ✅
+- Built browser extension, loaded into Chrome, tested end-to-end ✅
+- Deployed web app to Vercel ✅ → https://billable-three.vercel.app
+
+**Supabase changes:**
+- Created `handle_signup()` SECURITY DEFINER function
+- Fixed `time_entries` UPDATE policy with `WITH CHECK` clause
+- RLS disabled on `firms` table (intentional — see Known Issues)
+
+---
+
+## Current State
+
+### What's Working ✅
+- Full lawyer dashboard — timer, client grid, notes, manual entry, submit all, edit requests
+- Full admin dashboard — submitted entries, filters, edit request approve/deny
+- Lawyer invite flow — admin invites by email, lawyer receives invite, clicks link, lands on dashboard
+- Browser extension — client list, timer, notes, voice-to-text, syncs with web app
+- Light/dark mode on all pages
+- Auth — signup, login, role-based redirect, protected routes
+
+### Known Issues
+1. **RLS disabled on `firms` table** — low risk (table only has name + billing_increment). Could re-enable later with a permissive read policy.
+2. **Middleware deprecation warning** — Next.js 16 shows `The "middleware" file convention is deprecated. Please use "proxy" instead.` Not breaking, but needs rename eventually: `src/middleware.ts` → `src/proxy.ts`.
+3. **Invite email customization** — invite email uses Supabase's default template. User wants to customize the look and content.
+
+---
+
+## Next Steps (Priority Order)
+
+1. [ ] Fix middleware deprecation warning — rename `src/middleware.ts` → `src/proxy.ts`
+2. [ ] Customize invite email template in Supabase (Auth > Email Templates)
+3. [ ] Build lawyer stats dashboard — hours per client, hours per week, breakdown by task type
+4. [ ] Bulk lawyer onboarding — CSV import or bulk invite form
+
+---
+
+## Future Features (Post-MVP)
+
+- **Lawyer stats dashboard** — personal analytics section: hours per client, hours per week, breakdown by task type
+- **Bulk lawyer onboarding** — CSV import or bulk invite instead of one at a time
+- **Invite email customization** — branded email with custom content
+- AI auto-categorization of task types from notes
+- Smart inactivity detection to auto-pause timers
+- Integrations with legal billing software (Clio, MyCase, QuickBooks, etc.)
+- Mobile native app with home screen widget (iOS and Android)
+- Invoice generation
+
+---
+
+## Product Decisions Made
+- Widget is essential to the core value prop — quick one-click switching between clients
+- Notes are private to the lawyer until they submit to admin
+- Submissions go straight to admin (no approval on initial submit, only on edits)
+- Clients vs. matters handled at setup — admin inputs billable line items
+- Stop button triggers notes popup (smart auto-pause is post-MVP)
+- Monochrome design system — no color accents anywhere
+
+## Monetization
+- Base fee + per seat pricing (subject to change)
+
+---
+
+## Reference
+
+### Live URLs
 - **Production:** https://billable-three.vercel.app
 - **Vercel Project:** https://vercel.com/dallin-turners-projects/billable
 - **GitHub Repo:** https://github.com/dallinturner/billable (public)
+- **Supabase Dashboard:** https://supabase.com/dashboard/project/pzdbsnrxnpszvznrlftc
 
-## Deployment
-- Hosted on Vercel under "Dallin Turner's projects" team
-- GitHub auto-deploy IS connected (pushes to `main` trigger auto-deploy)
-- If auto-deploy ever fails, run manually from repo root:
-  ```bash
-  cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable"
-  vercel --prod --scope dallin-turners-projects
-  ```
-- Vercel project name: `billable` (NOT `billable-web` — that was an old failed project)
-- Root directory in Vercel is set to `billable-web`
-- Environment variables set in Vercel dashboard (Production + Preview + Development):
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- **Important:** When adding env vars via Vercel dashboard UI, paste carefully — the anon key previously got a newline injected mid-value which broke auth. Use CLI instead:
-  ```bash
-  echo "value" | vercel env add KEY production --scope dallin-turners-projects
-  ```
-
-## Tech Stack
+### Tech Stack
 - **Framework:** Next.js 16 (App Router) + TypeScript
 - **Database & Auth:** Supabase (PostgreSQL + Supabase Auth)
 - **Styling:** Tailwind CSS v4 (class-based dark mode via `@custom-variant dark`)
 - **Browser Extension:** Chrome Extension (Manifest V3) + React + Webpack
 - **Voice-to-text:** Web Speech API (built into Chrome, free)
 
-## Supabase Project
+### Supabase Project
 - **URL:** https://pzdbsnrxnpszvznrlftc.supabase.co
 - **Anon key:** stored in `billable-web/.env.local` (local) and Vercel env vars (production)
-- **Email confirmations:** disabled (turned off in Auth > Providers > Email)
-- **Auth redirect URLs:** https://billable-three.vercel.app added to allowed URLs
+- **Service role key:** stored in `billable-web/.env.local` (local) and Vercel production env vars
+- **Email confirmations:** disabled (Auth > Providers > Email)
+- **Auth redirect URLs:** `https://billable-three.vercel.app` and `https://billable-three.vercel.app/auth/confirm`
+- **Site URL:** `https://billable-three.vercel.app`
 
-## What Has Been Built
+### Deployment
+- Hosted on Vercel under "Dallin Turner's projects" team
+- GitHub auto-deploy connected but has broken before — if it stops working, deploy manually:
+  ```bash
+  cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable"
+  vercel --prod --scope dallin-turners-projects
+  ```
+- Vercel project name: `billable` (NOT `billable-web`)
+- Root directory in Vercel: `billable-web`
+- **Adding env vars** — use CLI to avoid newline injection bugs:
+  ```bash
+  echo "value" | vercel env add KEY production --scope dallin-turners-projects
+  ```
 
-### Web App (`/billable-web`)
-- **Next.js 16** project with TypeScript, Tailwind CSS, App Router
-- **Supabase client** set up in `src/lib/supabase/client.ts` (browser) and `src/lib/supabase/server.ts` (server)
-- **Types** defined in `src/types/database.ts` (Firm, User, Client, TaskType, TimeEntry, EditRequest)
-- **Time utilities** in `src/lib/time.ts` (rounding, formatting, grouping)
-- **ThemeProvider** in `src/components/ThemeProvider.tsx` — React context, persists to localStorage, applies `.dark` class to `<html>`
-
-**Design System**
-- Monochrome — no indigo/blue accents anywhere
-- Navbar: always `bg-gray-950` (dark), regardless of theme
-- Light mode: white/gray-50 backgrounds, gray-900 text
-- Dark mode: gray-950/gray-900 backgrounds, white text
-- Client lists use initials avatars + SVG chevrons (matching extension style)
-- `@custom-variant dark (&:where(.dark, .dark *))` in globals.css enables class-based dark mode
-
-**Auth**
-- `/auth/login` — email/password login with role-based redirect (admin → /admin, lawyer/individual → /dashboard)
-- `/auth/signup` — account type selector (Individual or Law Firm), creates firm + user records on signup
-- `/auth/callback` — Supabase OAuth callback handler
-- `src/middleware.ts` — protects `/dashboard` and `/admin` routes, redirects unauthenticated users to login
-
-**Lawyer Dashboard (`/dashboard`)**
-- Live timer card with elapsed counter (`TimerCard.tsx`) — always dark bg-gray-950
-- One-click client grid with initials avatars to start timers
-- Stop / Switch Client buttons → open notes popup
-- Notes popup (`NotesModal.tsx`) with task type dropdown + voice-to-text (Web Speech API)
-- Full entry history grouped by date (`TimeEntryRow.tsx`) with inline editing of draft entries
-- "Edit requested" orange badge on submitted entries with a pending edit request
-- "Request edit" button disabled when a pending edit request already exists
-- Manual entry form (`ManualEntryForm.tsx`) for after-the-fact time entries
-- "Submit all" button to push all draft entries to admin
-- Edit request modal (`EditRequestModal.tsx`) for requesting changes to submitted entries
-- Navbar shows: Dashboard + Settings links (role="individual" hardcoded — prevents admin users from seeing admin nav)
-
-**Lawyer Settings (`/dashboard/settings`)**
-- Appearance section: light/dark mode toggle
-- Profile section: update display name
-- Email shown (pulled from authUser.email, not User type)
-
-**Admin Dashboard (`/admin`)**
-- Stats overview: submitted entries, billable hours, lawyer count, pending edit requests
-- Filter bar by lawyer / client / task type / date range (`FilterBar.tsx`)
-- Entries table with totals (`EntriesTable.tsx`)
-- Edit requests tab with approve/deny actions that apply proposed changes to the entry (`EditRequestCard.tsx`)
-
-**Admin Settings (`/admin/settings`)**
-- Set billing increment (0.1, 0.25, 0.5, 1.0 hr)
-- Add/deactivate clients and matters
-- Add/deactivate task types
-- Team member list and invite flow
-- Appearance section: light/dark mode toggle
-
-**Shared**
-- `Navbar.tsx` — top nav with sign out. Shows admin links when `role="admin"`, lawyer links when `role="individual"`
-
-### Database (`/billable-web/supabase/migrations/001_initial_schema.sql`)
-- **Fully migrated to Supabase** — all tables created and verified
-- Tables: `firms`, `users`, `clients`, `task_types`, `time_entries`, `edit_requests`
-- Enums: `user_role`, `entry_status`, `edit_request_status`
-- RLS enabled on all tables with policies for lawyers and admins
-- Helper functions: `get_my_firm_id()`, `get_my_role()` (security definer)
-- 10 global default task types seeded
-- **Note:** RLS is disabled on `firms` table (was blocking signup flow — see known issues below)
-- Indexes on all FK and commonly filtered columns
-
-**RLS Fix Applied (Feb 20):**
-The `time_entries` update policy was missing a `WITH CHECK` clause, causing `Submit all` to silently fail. Fixed by running:
-```sql
-DROP POLICY "Users can update own draft entries" ON time_entries;
-CREATE POLICY "Users can update own draft entries"
-  ON time_entries FOR UPDATE
-  USING (user_id = auth.uid() AND status = 'draft')
-  WITH CHECK (user_id = auth.uid());
-```
-
-### Browser Extension (`/extension`)
-- `manifest.json` — Manifest V3, permissions: storage + alarms
-- `src/background.ts` — service worker, persists timer state across popup close via `chrome.storage.local`
-- `src/popup.tsx` — full React UI: logged-out state → client list → active timer view → notes form with voice-to-text
-- `src/supabase.ts` — Supabase client using `chrome.storage.local` for auth token persistence
-- `src/types.ts` — shared TypeScript types for the extension
-- `webpack.config.js` — bundles React + TypeScript for the extension
-- **Status:** Built and tested end-to-end. `WEBAPP_URL` updated to `https://billable-three.vercel.app` ✅
-- **Extension design:** Dark `bg-gray-950` header, client initials avatars, SVG chevrons, `w-64` width
-
-## Known Issues / In Progress
-
-### 1. RLS disabled on firms table
-- **Why:** Client-side inserts to `firms` and `users` during signup were failing because `auth.uid()` wasn't available in RLS context immediately after `signUp()`
-- **Fix applied:** Created a `handle_signup()` Postgres function with `SECURITY DEFINER` that creates both the firm and user profile atomically, bypassing RLS. Signup page now calls `supabase.rpc('handle_signup', ...)` instead of doing two separate inserts.
-- **Remaining:** RLS is still disabled on `firms` table. Low risk (firms table only has name + billing_increment), but could re-enable with a permissive policy once the SECURITY DEFINER flow is the only write path.
-
-### 2. Middleware deprecation warning
-- Next.js 16 shows: `The "middleware" file convention is deprecated. Please use "proxy" instead.`
-- Not breaking, but will need to rename `src/middleware.ts` → `src/proxy.ts` eventually
-
-### 3. Lawyer invite flow — working, email delivery unconfirmed
-- Server action (`/admin/settings/actions.ts`) uses `auth.admin.inviteUserByEmail()` with service role key
-- After invite, server action inserts directly into `public.users` using admin client (bypasses RLS)
-- `SUPABASE_SERVICE_ROLE_KEY` added to `.env.local` and Vercel production env vars
-- Admin client at `src/lib/supabase/admin.ts`
-- Invited user confirmed appearing in Supabase Auth > Users ✅
-- **Unconfirmed:** Invite email delivery not yet verified — check inbox/spam next session
-
-## Remaining Steps
-
-- [x] Fix signup bug (handle_signup SECURITY DEFINER function)
-- [x] End-to-end test core web app loop ✅
-- [x] Build and load browser extension into Chrome ✅
-- [x] End-to-end test extension loop ✅
-- [x] UI polish pass:
-  - Light/dark mode toggle (persisted in localStorage) ✅
-  - Full web app redesign — monochrome, no indigo ✅
-  - Extension redesigned — dark header, initials avatars, SVG chevrons ✅
-  - Dark mode toggle moved to Settings pages (lawyer + admin) ✅
-  - Lawyer settings page created at `/dashboard/settings` ✅
-- [x] Fix Submit all bug (RLS WITH CHECK clause) ✅
-- [x] Add "Edit requested" badge to lawyer dashboard ✅
-- [x] Deploy web app to Vercel ✅ → https://billable-three.vercel.app
-- [x] Test edit request flow end-to-end ✅
-  - Fixed bug: `handleEditRequest` wasn't calling `loadData()` after insert, so badge didn't appear immediately
-- [x] Update extension `.env` `WEBAPP_URL` to `https://billable-three.vercel.app` ✅
-- [x] Lawyer invite flow — server action working, user appears in Supabase ✅ (email delivery unconfirmed)
-- [ ] **Confirm invite email arrives** in lawyer's inbox
-- [ ] Fix middleware deprecation warning (rename `src/middleware.ts` → `src/proxy.ts`)
-
-## How to Resume Development
-
-### Start the web app locally
+### Commands
 ```bash
+# Start web app locally
 cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable/billable-web"
 npm run dev
-# Opens at http://localhost:3000
-```
 
-### Deploy to production
-```bash
+# Deploy to production
 cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable"
-git add -p
-git commit -m "your message"
-git push
-# Vercel auto-deploys from GitHub push
-# If auto-deploy fails, run: vercel --prod --scope dallin-turners-projects
-```
+vercel --prod --scope dallin-turners-projects
 
-### Rebuild the extension after code changes
-```bash
+# Rebuild extension after changes
 cd "/Users/dallinturner/Desktop/STRAT 490R/Projects/Billable/extension"
 npm run build
-# Then go to chrome://extensions and click the refresh icon on the Billable card
+# Then refresh the extension at chrome://extensions
 ```
 
-### Test accounts
-- **Admin:** your main signup account at https://billable-three.vercel.app
-- **Lawyer:** signed up with `yourname+lawyer@gmail.com`, role "Individual", `firm_id` manually set in Supabase Table Editor to match admin's firm_id
-- To create more lawyer accounts: same process — sign up as Individual, set firm_id in Supabase
-- **Invite flow (in progress):** Admin Settings > Team > Invite lawyer — sends invite via Supabase. Email delivery unconfirmed — debug next session.
+### Test Accounts
+- **Admin:** main signup account at https://billable-three.vercel.app
+- **Lawyer (manual):** sign up as Individual at https://billable-three.vercel.app/auth/signup, then set `firm_id` in Supabase Table Editor to match admin's firm_id
+- **Lawyer (invite):** use Admin Settings > Team > Invite lawyer. Use `yourname+lawyer1@gmail.com` format to receive invite in your own Gmail inbox.
 
-### Supabase
-- Dashboard: https://supabase.com/dashboard/project/pzdbsnrxnpszvznrlftc
-- SQL Editor: for running any schema changes
-- Table Editor: for inspecting data while debugging
-
-## Project File Structure
+### Project File Structure
 ```
 Billable/
 ├── CLAUDE.md
@@ -222,7 +208,8 @@ Billable/
 │   │   │   ├── globals.css        # Tailwind v4 + @custom-variant dark
 │   │   │   ├── auth/login/        # Login page
 │   │   │   ├── auth/signup/       # Signup page
-│   │   │   ├── auth/callback/     # Supabase auth callback
+│   │   │   ├── auth/callback/     # PKCE code exchange (standard login/signup)
+│   │   │   ├── auth/confirm/      # Implicit flow handler (invite links)
 │   │   │   ├── dashboard/         # Lawyer dashboard + settings
 │   │   │   └── admin/             # Admin dashboard + settings
 │   │   ├── components/
@@ -233,8 +220,8 @@ Billable/
 │   │   ├── lib/
 │   │   │   ├── supabase/          # client.ts + server.ts + admin.ts (service role)
 │   │   │   └── time.ts            # Time formatting utilities
-│   │   ├── middleware.ts           # Route protection
-│   │   └── types/database.ts      # TypeScript types
+│   │   ├── middleware.ts          # Route protection + role-based redirects
+│   │   └── types/database.ts     # TypeScript types
 │   └── supabase/migrations/       # SQL migration files
 └── extension/                     # Chrome extension
     ├── manifest.json
@@ -245,73 +232,3 @@ Billable/
     │   └── types.ts               # TypeScript types
     └── webpack.config.js
 ```
-
----
-
-## MVP Scope
-
-### Platform
-- **Browser extension** (desktop widget) — built first
-- **Web app** for dashboards
-- **Mobile native app** with widget — later, post-MVP
-
-### Core Interaction (Browser Extension Widget)
-- Widget lists all billable clients/matters
-- Click a client to start the timer
-- Click stop or switch to another client to end the timer
-- Notes popup appears with:
-  - Task type dropdown (predefined list)
-  - Voice-to-text option for recording what was done
-- Time displayed as both exact time and rounded to the firm's billing increment
-
-### Account Types
-
-**Individual Account**
-- Solo practitioner managing themselves
-
-**Firm Account**
-- Admin/manager sets up the account
-- Admin manages: lawyers, clients/matters, billing increments, task type list
-- Admin sees all submitted lawyer dashboards
-- Admin can drill down into any individual lawyer's data
-
-### Lawyer Personal Dashboard
-- Full history of all tracked sessions including notes
-- Edit time, notes, and task type before submitting to admin
-- Manually add billable hours after the fact
-- Submit hours to the admin dashboard
-- After submission, can request edits — admin is notified and approves or denies
-
-### Admin Dashboard
-- Sees all submitted hours across all lawyers
-- Drill down into individual lawyer records
-- Filter and view by: client, lawyer, task type, and more
-- Approves or denies lawyer edit requests post-submission
-
-### Task Types
-- Start with a predefined list (e.g., Research, Drafting, Client Call, Court Appearance, etc.)
-- Admin can add to or remove from the list
-- **Future:** AI auto-categorization from notes
-
-### Billing Increments
-- Admin sets the firm's billing increment (e.g., 0.1 hour / 6-minute increments)
-- Dashboard shows both exact time worked and calculated billable hours side by side
-
-## Monetization
-- Base fee + per seat pricing (subject to change)
-
-## Future Features (Post-MVP)
-- **Lawyer stats dashboard** — section on the lawyer dashboard showing personal analytics: hours worked per client, hours per week, breakdown by task type, etc. Gives lawyers visibility into their own billing patterns at a glance.
-- **Bulk lawyer onboarding** — way for a law firm to upload all their lawyers and info quickly (CSV import or bulk invite form) instead of inviting one at a time
-- AI auto-categorization of task types from notes
-- Smart inactivity detection to auto-pause timers
-- Integrations with legal billing software (Clio, MyCase, QuickBooks, etc.)
-- Mobile native app with home screen widget (iOS and Android)
-- Invoice generation
-
-## Key Product Decisions Made
-- Widget is essential to the core value prop — it enables quick one-click switching between clients
-- Notes are private to the lawyer until they submit to the admin dashboard
-- Submissions go straight to the admin dashboard (no approval step on initial submission, only on edits)
-- Clients vs. matters are handled at setup — admin inputs billable line items, which become what appears in the widget
-- Stop button triggers the notes popup (smart auto-pause comes later)
