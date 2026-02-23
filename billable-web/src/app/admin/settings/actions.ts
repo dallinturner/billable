@@ -20,12 +20,21 @@ export async function inviteLawyer(email: string, fullName: string, firmId: stri
     }
 
     const adminClient = createAdminClient()
-    const { error } = await adminClient.auth.admin.inviteUserByEmail(email, {
+    const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: { full_name: fullName, firm_id: firmId, role: 'lawyer' },
       redirectTo: 'https://billable-three.vercel.app/auth/callback',
     })
 
     if (error) return { error: error.message }
+
+    const { error: profileError } = await adminClient.from('users').insert({
+      id: data.user.id,
+      firm_id: firmId,
+      full_name: fullName,
+      role: 'lawyer',
+    })
+
+    if (profileError) return { error: profileError.message }
     return { error: null }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unexpected error' }
