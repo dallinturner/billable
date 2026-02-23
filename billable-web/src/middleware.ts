@@ -49,16 +49,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Role-based protection: non-admins can't access /admin
-  if (user && pathname.startsWith('/admin')) {
+  // Role-based protection
+  if (user && (pathname.startsWith('/admin') || pathname.startsWith('/dashboard'))) {
     const { data: profile } = await supabase
       .from('users')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    if (profile?.role !== 'admin') {
+    if (pathname.startsWith('/admin') && profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+    if (pathname.startsWith('/dashboard') && profile?.role === 'admin') {
+      return NextResponse.redirect(new URL('/admin', request.url))
     }
   }
 
