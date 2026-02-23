@@ -149,18 +149,27 @@ export default function AdminSettingsPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar userName={user?.full_name} role={user?.role} />
 
+      {/* Toast notifications */}
+      {(error || success) && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+          {error && (
+            <div className="bg-red-50 dark:bg-gray-900 border border-red-200 dark:border-red-500/30 rounded-xl px-4 py-3 text-red-600 dark:text-red-400 text-sm shadow-lg">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-white dark:bg-gray-900 border border-emerald-200 dark:border-emerald-500/30 rounded-xl px-4 py-3 text-emerald-700 dark:text-emerald-400 text-sm shadow-lg">
+              {success}
+            </div>
+          )}
+        </div>
+      )}
+
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
         <div className="mb-8">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Settings</h1>
           <p className="text-sm text-gray-400 mt-0.5">Manage your firm setup</p>
         </div>
-
-        {error && (
-          <div className="mb-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl px-4 py-3 text-red-600 dark:text-red-400 text-sm">{error}</div>
-        )}
-        {success && (
-          <div className="mb-4 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl px-4 py-3 text-emerald-700 dark:text-emerald-400 text-sm">{success}</div>
-        )}
 
         <div className="space-y-6">
           {/* Appearance */}
