@@ -109,7 +109,8 @@ export default function AdminSettingsPage() {
     e.preventDefault()
     if (!newLawyerEmail.trim() || !newLawyerName.trim() || !firm) return
     setSaving(true)
-    const { error } = await inviteLawyer(newLawyerEmail.trim(), newLawyerName.trim(), firm.id)
+    const result = await inviteLawyer(newLawyerEmail.trim(), newLawyerName.trim(), firm.id).catch((e: Error) => ({ error: e.message }))
+    const { error } = result
     if (error) flash(error, true)
     else {
       flash(`Invite sent to ${newLawyerEmail}`)
