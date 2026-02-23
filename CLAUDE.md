@@ -5,8 +5,8 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 
 ## Current Status
 - **Phase:** MVP fully built, deployed, and live. Core flows tested end-to-end.
-- **Last Session:** February 20, 2026
-- **Next Step:** Test edit request flow end-to-end, then update extension WEBAPP_URL to production URL.
+- **Last Session:** February 22, 2026
+- **Next Step:** Debug lawyer invite flow — confirm whether invite is actually being created in Supabase Auth > Users, then fix email delivery if needed.
 
 ## Live URLs
 - **Production:** https://billable-three.vercel.app
@@ -128,7 +128,7 @@ CREATE POLICY "Users can update own draft entries"
 - `src/supabase.ts` — Supabase client using `chrome.storage.local` for auth token persistence
 - `src/types.ts` — shared TypeScript types for the extension
 - `webpack.config.js` — bundles React + TypeScript for the extension
-- **Status:** Built and tested end-to-end. Needs `WEBAPP_URL` updated to production URL before distributing.
+- **Status:** Built and tested end-to-end. `WEBAPP_URL` updated to `https://billable-three.vercel.app` ✅
 - **Extension design:** Dark `bg-gray-950` header, client initials avatars, SVG chevrons, `w-64` width
 
 ## Known Issues / In Progress
@@ -142,10 +142,15 @@ CREATE POLICY "Users can update own draft entries"
 - Next.js 16 shows: `The "middleware" file convention is deprecated. Please use "proxy" instead.`
 - Not breaking, but will need to rename `src/middleware.ts` → `src/proxy.ts` eventually
 
-### 3. Lawyer invite flow is placeholder
-- Admin Settings shows a team member list and an "Invite" button
-- Currently just shows a flash message — does not actually send an email invite
-- Real fix: use Supabase's `auth.admin.inviteUserByEmail()` via a server action, or send a magic link
+### 3. Lawyer invite flow — email delivery unconfirmed
+- Server action (`/admin/settings/actions.ts`) implemented using `auth.admin.inviteUserByEmail()` with service role key
+- Postgres trigger `on_auth_user_created` added — auto-creates `users` row from invite metadata when invite is sent
+- `SUPABASE_SERVICE_ROLE_KEY` added to `.env.local` and Vercel production env vars
+- Admin client at `src/lib/supabase/admin.ts`
+- **Unresolved:** Tested on production, form clears (suggesting success) but no invite email received and no error shown. Need to verify:
+  1. Check Supabase Auth > Users — does an invited user appear?
+  2. If yes: email delivery issue (may need custom SMTP configured in Supabase)
+  3. If no: server action is silently failing — check Vercel function logs
 
 ## Remaining Steps
 
@@ -162,13 +167,10 @@ CREATE POLICY "Users can update own draft entries"
 - [x] Fix Submit all bug (RLS WITH CHECK clause) ✅
 - [x] Add "Edit requested" badge to lawyer dashboard ✅
 - [x] Deploy web app to Vercel ✅ → https://billable-three.vercel.app
-- [ ] **Test edit request flow end-to-end:**
-  - Lawyer clicks "Request edit" on a submitted entry
-  - Admin sees it in the Edit Requests tab
-  - Admin approves/denies and changes apply
-  - Verify "Edit requested" badge clears after admin resolves it
-- [ ] Update extension `.env` `WEBAPP_URL` to `https://billable-three.vercel.app`
-- [ ] Fix lawyer invite flow (currently placeholder — needs real email invite via Supabase)
+- [x] Test edit request flow end-to-end ✅
+  - Fixed bug: `handleEditRequest` wasn't calling `loadData()` after insert, so badge didn't appear immediately
+- [x] Update extension `.env` `WEBAPP_URL` to `https://billable-three.vercel.app` ✅
+- [ ] **Debug lawyer invite flow** — see Known Issue #3 above
 - [ ] Fix middleware deprecation warning (rename `src/middleware.ts` → `src/proxy.ts`)
 
 ## How to Resume Development
@@ -201,6 +203,7 @@ npm run build
 - **Admin:** your main signup account at https://billable-three.vercel.app
 - **Lawyer:** signed up with `yourname+lawyer@gmail.com`, role "Individual", `firm_id` manually set in Supabase Table Editor to match admin's firm_id
 - To create more lawyer accounts: same process — sign up as Individual, set firm_id in Supabase
+- **Invite flow (in progress):** Admin Settings > Team > Invite lawyer — sends invite via Supabase. Email delivery unconfirmed — debug next session.
 
 ### Supabase
 - Dashboard: https://supabase.com/dashboard/project/pzdbsnrxnpszvznrlftc
@@ -229,7 +232,7 @@ Billable/
 │   │   │   ├── dashboard/         # TimerCard, TimeEntryRow, NotesModal, etc.
 │   │   │   └── admin/             # FilterBar, EntriesTable, EditRequestCard
 │   │   ├── lib/
-│   │   │   ├── supabase/          # client.ts + server.ts
+│   │   │   ├── supabase/          # client.ts + server.ts + admin.ts (service role)
 │   │   │   └── time.ts            # Time formatting utilities
 │   │   ├── middleware.ts           # Route protection
 │   │   └── types/database.ts      # TypeScript types
