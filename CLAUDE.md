@@ -5,8 +5,8 @@ A billable hours tracking tool for lawyers and law firms. Solves the problem of 
 
 ## Current Status
 - **Phase:** MVP fully built, deployed, and live. Core flows tested end-to-end.
-- **Last Session:** February 22, 2026
-- **Next Step:** Debug lawyer invite flow — confirm whether invite is actually being created in Supabase Auth > Users, then fix email delivery if needed.
+- **Last Session:** February 23, 2026
+- **Next Step:** Confirm invite email arrives in lawyer's inbox. Then fix middleware deprecation warning (rename `src/middleware.ts` → `src/proxy.ts`).
 
 ## Live URLs
 - **Production:** https://billable-three.vercel.app
@@ -142,15 +142,13 @@ CREATE POLICY "Users can update own draft entries"
 - Next.js 16 shows: `The "middleware" file convention is deprecated. Please use "proxy" instead.`
 - Not breaking, but will need to rename `src/middleware.ts` → `src/proxy.ts` eventually
 
-### 3. Lawyer invite flow — email delivery unconfirmed
-- Server action (`/admin/settings/actions.ts`) implemented using `auth.admin.inviteUserByEmail()` with service role key
-- Postgres trigger `on_auth_user_created` added — auto-creates `users` row from invite metadata when invite is sent
+### 3. Lawyer invite flow — working, email delivery unconfirmed
+- Server action (`/admin/settings/actions.ts`) uses `auth.admin.inviteUserByEmail()` with service role key
+- After invite, server action inserts directly into `public.users` using admin client (bypasses RLS)
 - `SUPABASE_SERVICE_ROLE_KEY` added to `.env.local` and Vercel production env vars
 - Admin client at `src/lib/supabase/admin.ts`
-- **Unresolved:** Tested on production, form clears (suggesting success) but no invite email received and no error shown. Need to verify:
-  1. Check Supabase Auth > Users — does an invited user appear?
-  2. If yes: email delivery issue (may need custom SMTP configured in Supabase)
-  3. If no: server action is silently failing — check Vercel function logs
+- Invited user confirmed appearing in Supabase Auth > Users ✅
+- **Unconfirmed:** Invite email delivery not yet verified — check inbox/spam next session
 
 ## Remaining Steps
 
@@ -170,7 +168,8 @@ CREATE POLICY "Users can update own draft entries"
 - [x] Test edit request flow end-to-end ✅
   - Fixed bug: `handleEditRequest` wasn't calling `loadData()` after insert, so badge didn't appear immediately
 - [x] Update extension `.env` `WEBAPP_URL` to `https://billable-three.vercel.app` ✅
-- [ ] **Debug lawyer invite flow** — see Known Issue #3 above
+- [x] Lawyer invite flow — server action working, user appears in Supabase ✅ (email delivery unconfirmed)
+- [ ] **Confirm invite email arrives** in lawyer's inbox
 - [ ] Fix middleware deprecation warning (rename `src/middleware.ts` → `src/proxy.ts`)
 
 ## How to Resume Development
