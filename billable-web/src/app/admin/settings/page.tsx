@@ -151,7 +151,7 @@ export default function AdminSettingsPage() {
 
       {/* Toast notifications */}
       {(error || success) && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm px-4">
+        <div style={{ position: 'fixed', top: '1rem', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, width: '100%', maxWidth: '24rem', padding: '0 1rem' }}>
           {error && (
             <div className="bg-red-50 dark:bg-gray-900 border border-red-200 dark:border-red-500/30 rounded-xl px-4 py-3 text-red-600 dark:text-red-400 text-sm shadow-lg">
               {error}
