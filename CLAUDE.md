@@ -301,6 +301,7 @@ Billable/
 - Base fee + per seat pricing (subject to change)
 
 ## Future Features (Post-MVP)
+- **Lawyer stats dashboard** — section on the lawyer dashboard showing personal analytics: hours worked per client, hours per week, breakdown by task type, etc. Gives lawyers visibility into their own billing patterns at a glance.
 - **Bulk lawyer onboarding** — way for a law firm to upload all their lawyers and info quickly (CSV import or bulk invite form) instead of inviting one at a time
 - AI auto-categorization of task types from notes
 - Smart inactivity detection to auto-pause timers
