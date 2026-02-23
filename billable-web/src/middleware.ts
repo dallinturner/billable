@@ -35,7 +35,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages (but not /auth/callback — it must run to exchange tokens)
-  if (user && pathname.startsWith('/auth') && !pathname.startsWith('/auth/callback')) {
+  if (user && pathname.startsWith('/auth') && !pathname.startsWith('/auth/callback') && !pathname.startsWith('/auth/confirm')) {
     const { data: profile } = await supabase
       .from('users')
       .select('role')

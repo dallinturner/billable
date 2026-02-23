@@ -22,7 +22,7 @@ export async function inviteLawyer(email: string, fullName: string, firmId: stri
     const adminClient = createAdminClient()
     const { data, error } = await adminClient.auth.admin.inviteUserByEmail(email, {
       data: { full_name: fullName, firm_id: firmId, role: 'lawyer' },
-      redirectTo: 'https://billable-three.vercel.app/auth/callback',
+      redirectTo: 'https://billable-three.vercel.app/auth/confirm',
     })
 
     if (error) return { error: error.message }
