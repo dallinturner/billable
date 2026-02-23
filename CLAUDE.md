@@ -1,7 +1,34 @@
 # Billable - Project Context
 
-## What This Product Is
-A billable hours tracking tool for lawyers and law firms. Solves the problem of lawyers losing revenue by missing billable hours. Built for solo practitioners and law firms of all sizes.
+---
+
+## Product Vision
+
+**Billable is a billable hours tracker built specifically for lawyers and law firms.**
+
+Lawyers lose thousands of dollars in revenue every year not because they don't do the work, but because they forget to log it. A quick phone call, a ten-minute email, a hallway conversation — these add up fast and almost never make it onto a timesheet. Billable solves this by making time tracking frictionless: one click to start, one click to stop, and a simple notes flow to capture what was done.
+
+### The Core Product
+The centerpiece is a **browser extension widget** that lives in the corner of the lawyer's screen while they work. It shows a list of all their active clients. They click a client to start the timer, and click stop when they're done. A quick notes popup captures the task type and any details via typing or voice-to-text. Time is automatically rounded to the firm's billing increment (e.g., 6-minute increments). That's it — no manual entry, no forgetting, no lost revenue.
+
+Everything syncs to a **web app** with two dashboards:
+- **Lawyer dashboard** — full history of tracked time, ability to edit drafts, submit hours to admin, and request edits to already-submitted entries
+- **Admin dashboard** — firm-wide view of all submitted hours across all lawyers, filterable by lawyer/client/task/date, with an edit request approval flow
+
+### Who It's For
+- **Solo practitioners** — manage themselves, track their own hours, see their own stats
+- **Law firms** — admin sets up the firm (clients, billing increment, task types, team), lawyers track and submit hours, admin reviews and approves
+
+### The Problem It Solves
+Traditional time tracking for lawyers is painful — either done at the end of the day from memory (losing hours), or requires switching to a separate app mid-work (friction that leads to skipping it). Billable lives where lawyers already work (the browser) and gets out of the way.
+
+### Design Philosophy
+- **Monochrome** — clean, professional, no distracting colors. Lawyers work in a formal environment and the tool should match.
+- **One-click interactions** — every core action (start timer, stop timer, switch client) is a single click
+- **Frictionless** — the extension is always one click away, voice-to-text reduces typing, billing math is automatic
+
+### Current Phase
+MVP is fully built, deployed, and live at **https://billable-three.vercel.app**. Core flows tested end-to-end. Actively iterating on polish and additional features.
 
 ---
 
