@@ -302,6 +302,7 @@ Billable/
 - Base fee + per seat pricing (subject to change)
 
 ## Future Features (Post-MVP)
+- **Bulk lawyer onboarding** — way for a law firm to upload all their lawyers and info quickly (CSV import or bulk invite form) instead of inviting one at a time
 - AI auto-categorization of task types from notes
 - Smart inactivity detection to auto-pause timers
 - Integrations with legal billing software (Clio, MyCase, QuickBooks, etc.)
