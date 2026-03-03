@@ -10,6 +10,7 @@ import TimeEntryRow from '@/components/dashboard/TimeEntryRow'
 import NotesModal from '@/components/dashboard/NotesModal'
 import ManualEntryForm from '@/components/dashboard/ManualEntryForm'
 import EditRequestModal from '@/components/dashboard/EditRequestModal'
+import VoiceRecorderCard from '@/components/dashboard/VoiceRecorderCard'
 import { roundToBillingIncrement, groupByDate, formatDate } from '@/lib/time'
 import type { Client, TaskType, TimeEntry, User, Firm } from '@/types/database'
 
@@ -39,7 +40,10 @@ export default function DashboardPage() {
   const [showManualForm, setShowManualForm] = useState(false)
   const [editRequestEntry, setEditRequestEntry] = useState<TimeEntry | null>(null)
   const [pendingStopEntryId, setPendingStopEntryId] = useState<string | null>(null)
+  const [pendingStartedAt, setPendingStartedAt] = useState<string | null>(null)
   const [switchingTo, setSwitchingTo] = useState<string | null>(null)
+  const [voiceClientId, setVoiceClientId] = useState<string | null>(null)
+  const [voicePrefillNotes, setVoicePrefillNotes] = useState('')
 
   const loadData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -109,20 +113,35 @@ export default function DashboardPage() {
 
   function handleStop() {
     setPendingStopEntryId(activeTimer?.entryId ?? null)
+    setPendingStartedAt(activeTimer?.startedAt ?? null)
     setShowNotesModal(true)
   }
 
   function handleSwitch() {
     setPendingStopEntryId(activeTimer?.entryId ?? null)
+    setPendingStartedAt(activeTimer?.startedAt ?? null)
     setShowNotesModal(true)
     setSwitchingTo('pick')
   }
 
+  function handleVoiceDone(entryId: string, startedAt: string, transcript: string) {
+    setPendingStopEntryId(entryId)
+    setPendingStartedAt(startedAt)
+    setVoicePrefillNotes(transcript)
+    setVoiceClientId(null)
+    setShowNotesModal(true)
+  }
+
+  function handleVoiceDiscard() {
+    setVoiceClientId(null)
+    loadData()
+  }
+
   async function handleNotesSave(notes: string, taskTypeId: string) {
-    if (!pendingStopEntryId || !activeTimer || !firm) return
+    if (!pendingStopEntryId || !pendingStartedAt || !firm) return
 
     const endedAt = new Date().toISOString()
-    const startMs = new Date(activeTimer.startedAt).getTime()
+    const startMs = new Date(pendingStartedAt).getTime()
     const exactMinutes = (Date.now() - startMs) / 60000
     const billable = roundToBillingIncrement(exactMinutes, firm.billing_increment)
 
@@ -139,6 +158,8 @@ export default function DashboardPage() {
 
     setActiveTimer(null)
     setPendingStopEntryId(null)
+    setPendingStartedAt(null)
+    setVoicePrefillNotes('')
     setShowNotesModal(false)
     setSwitchingTo(null)
     await loadData()
@@ -262,31 +283,56 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Voice recorder (replaces client picker when recording) */}
+        {!activeTimer && voiceClientId && (() => {
+          const voiceClient = clients.find(c => c.id === voiceClientId)
+          return voiceClient ? (
+            <div className="mb-6">
+              <VoiceRecorderCard
+                client={voiceClient}
+                onDone={handleVoiceDone}
+                onDiscard={handleVoiceDiscard}
+              />
+            </div>
+          ) : null
+        })()}
+
         {/* Client picker */}
-        {!activeTimer && clients.length > 0 && (
+        {!activeTimer && !voiceClientId && clients.length > 0 && (
           <div className="mb-6">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Start a timer</p>
             <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden">
               {clients.map((client, i) => (
-                <button
+                <div
                   key={client.id}
-                  onClick={() => startTimer(client.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-950 dark:hover:bg-gray-950 group transition-colors ${
-                    i < clients.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''
-                  }`}
+                  className={`flex items-center ${i < clients.length - 1 ? 'border-b border-gray-100 dark:border-gray-800' : ''}`}
                 >
-                  <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 group-hover:bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
-                    <span className="text-[10px] font-bold text-gray-500 group-hover:text-white transition-colors">
-                      {getInitials(client.name)}
+                  <button
+                    onClick={() => startTimer(client.id)}
+                    className="flex-1 flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-950 dark:hover:bg-gray-950 group transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 group-hover:bg-white/10 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+                      <span className="text-[10px] font-bold text-gray-500 group-hover:text-white transition-colors">
+                        {getInitials(client.name)}
+                      </span>
+                    </div>
+                    <span className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-white truncate transition-colors">
+                      {client.name}
                     </span>
-                  </div>
-                  <span className="flex-1 text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-white truncate transition-colors">
-                    {client.name}
-                  </span>
-                  <svg className="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
-                  </svg>
-                </button>
+                    <svg className="w-4 h-4 text-gray-300 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 18l6-6-6-6" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setVoiceClientId(client.id)}
+                    title="Record voice note"
+                    className="px-3 py-3 text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
               ))}
             </div>
           </div>
@@ -357,8 +403,10 @@ export default function DashboardPage() {
           onCancel={() => {
             setShowNotesModal(false)
             setSwitchingTo(null)
+            setVoicePrefillNotes('')
           }}
           title={switchingTo ? 'Notes for current session' : 'Add notes before stopping'}
+          initialNotes={voicePrefillNotes}
         />
       )}
 

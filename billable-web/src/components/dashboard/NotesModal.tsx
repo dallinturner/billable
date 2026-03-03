@@ -8,10 +8,11 @@ interface NotesModalProps {
   onSave: (notes: string, taskTypeId: string) => void
   onCancel: () => void
   title?: string
+  initialNotes?: string
 }
 
-export default function NotesModal({ taskTypes, onSave, onCancel, title = 'Add notes' }: NotesModalProps) {
-  const [notes, setNotes] = useState('')
+export default function NotesModal({ taskTypes, onSave, onCancel, title = 'Add notes', initialNotes = '' }: NotesModalProps) {
+  const [notes, setNotes] = useState(initialNotes)
   const [taskTypeId, setTaskTypeId] = useState(taskTypes[0]?.id ?? '')
   const [recording, setRecording] = useState(false)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

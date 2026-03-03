@@ -3,6 +3,27 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
+async function stripeGet(path: string) {
+  const res = await fetch(`https://api.stripe.com${path}`, {
+    headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY!.trim()}` },
+    cache: 'no-store',
+  })
+  return res.json()
+}
+
+async function stripePost(path: string, params: Record<string, string>) {
+  const res = await fetch(`https://api.stripe.com${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY!.trim()}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams(params).toString(),
+    cache: 'no-store',
+  })
+  return res.json()
+}
+
 export async function inviteLawyer(email: string, fullName: string, firmId: string) {
   try {
     const supabase = await createClient()
@@ -35,6 +56,27 @@ export async function inviteLawyer(email: string, fullName: string, firmId: stri
     })
 
     if (profileError) return { error: profileError.message }
+
+    // If the firm has an active Stripe subscription, increment the seat quantity
+    const { data: firm } = await adminClient
+      .from('firms')
+      .select('stripe_subscription_id, subscription_status')
+      .eq('id', firmId)
+      .single()
+
+    if (firm?.subscription_status === 'active' && firm.stripe_subscription_id) {
+      const subscription = await stripeGet(`/v1/subscriptions/${firm.stripe_subscription_id}`)
+      const seatItem = subscription.items?.data?.find(
+        (item: { price: { id: string }; id: string; quantity: number }) =>
+          item.price.id === process.env.STRIPE_FIRM_SEAT_PRICE_ID?.trim()
+      )
+      if (seatItem) {
+        await stripePost(`/v1/subscription_items/${seatItem.id}`, {
+          quantity: String((seatItem.quantity ?? 1) + 1),
+        })
+      }
+    }
+
     return { error: null }
   } catch (e) {
     return { error: e instanceof Error ? e.message : 'Unexpected error' }

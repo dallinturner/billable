@@ -1,0 +1,24 @@
+project_id = "pzdbsnrxnpszvznrlftc"
+
+[auth]
+site_url = "https://billable-three.vercel.app"
+additional_redirect_urls = ["https://billable-web-seven.vercel.app", "https://billable-three.vercel.app/auth/confirm"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_manual_linking = false
+
+[auth.email]
+enable_confirmations = false
+double_confirm_changes = true
+secure_password_change = false
+max_frequency = "1m0s"
+otp_length = 8
+otp_expiry = 3600
+
+[auth.email.template.invite]
+subject = "You've been invited to Billable"
+content_path = "./supabase/templates/invite.html"
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true

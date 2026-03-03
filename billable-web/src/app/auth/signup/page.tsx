@@ -6,14 +6,14 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { initializeBilling } from '@/app/billing/actions'
 
 type AccountType = 'individual' | 'firm'
 
 export default function SignupPage() {
-  const [accountType, setAccountType] = useState<AccountType>('individual')
+  const [accountType, setAccountType] = useState<AccountType>('firm')
   const [fullName, setFullName] = useState('')
   const [firmName, setFirmName] = useState('')
-  const [billingIncrement, setBillingIncrement] = useState('0.1')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -41,13 +41,36 @@ export default function SignupPage() {
       p_full_name: fullName,
       p_role: accountType === 'firm' ? 'admin' : 'individual',
       p_firm_name: accountType === 'firm' ? firmName : `${fullName}'s Practice`,
-      p_billing_increment: parseFloat(billingIncrement),
+      p_billing_increment: 0.1,
     })
 
     if (signupError) {
       setError('Failed to create account: ' + signupError.message)
       setLoading(false)
       return
+    }
+
+    // Initialize Stripe billing for new accounts
+    const { data: userProfile } = await supabase
+      .from('users')
+      .select('firm_id')
+      .eq('id', userId)
+      .single()
+
+    if (userProfile?.firm_id) {
+      const { data: firmData } = await supabase
+        .from('firms')
+        .select('name')
+        .eq('id', userProfile.firm_id)
+        .single()
+
+      if (firmData) {
+        await initializeBilling(
+          userProfile.firm_id,
+          firmData.name,
+          accountType === 'firm' ? 'firm' : 'solo'
+        )
+      }
     }
 
     if (accountType === 'firm') {
@@ -114,16 +137,6 @@ export default function SignupPage() {
                 <input type="text" value={firmName} onChange={(e) => setFirmName(e.target.value)} required className={inputClass} placeholder="Smith & Associates" />
               </div>
             )}
-
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Billing increment</label>
-              <select value={billingIncrement} onChange={(e) => setBillingIncrement(e.target.value)} className={inputClass}>
-                <option value="0.1">0.1 hour (6-minute increments)</option>
-                <option value="0.25">0.25 hour (15-minute increments)</option>
-                <option value="0.5">0.5 hour (30-minute increments)</option>
-                <option value="1">1.0 hour increments</option>
-              </select>
-            </div>
 
             <div>
               <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5">Email</label>

@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 interface NavbarProps {
@@ -11,7 +11,13 @@ interface NavbarProps {
 
 export default function Navbar({ userName, role }: NavbarProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+
+  function navClass(href: string) {
+    const active = pathname === href
+    return `text-sm transition ${active ? 'text-white font-medium' : 'text-gray-400 hover:text-white'}`
+  }
 
   async function handleSignOut() {
     await supabase.auth.signOut()
@@ -33,10 +39,10 @@ export default function Navbar({ userName, role }: NavbarProps) {
 
           {role === 'admin' && (
             <nav className="flex items-center gap-6">
-              <Link href="/admin" className="text-sm text-gray-400 hover:text-white transition">
+              <Link href="/admin" className={navClass('/admin')}>
                 Dashboard
               </Link>
-              <Link href="/admin/settings" className="text-sm text-gray-400 hover:text-white transition">
+              <Link href="/admin/settings" className={navClass('/admin/settings')}>
                 Settings
               </Link>
             </nav>
@@ -44,10 +50,13 @@ export default function Navbar({ userName, role }: NavbarProps) {
 
           {role === 'individual' && (
             <nav className="flex items-center gap-6">
-              <Link href="/dashboard" className="text-sm text-gray-400 hover:text-white transition">
-                Dashboard
+              <Link href="/dashboard" className={navClass('/dashboard')}>
+                Hours
               </Link>
-              <Link href="/dashboard/settings" className="text-sm text-gray-400 hover:text-white transition">
+              <Link href="/dashboard/stats" className={navClass('/dashboard/stats')}>
+                Stats
+              </Link>
+              <Link href="/dashboard/settings" className={navClass('/dashboard/settings')}>
                 Settings
               </Link>
             </nav>

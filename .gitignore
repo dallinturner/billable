@@ -11,3 +11,4 @@ extension/.env
 billable-web/.env.local
 billable-web/.next/
 billable-web/node_modules/
+.vercel

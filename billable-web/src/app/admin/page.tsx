@@ -3,6 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Navbar from '@/components/Navbar'
 import FilterBar, { type Filters } from '@/components/admin/FilterBar'
@@ -12,6 +13,7 @@ import type { Client, TaskType, TimeEntry, User, Firm, EditRequest } from '@/typ
 
 export default function AdminPage() {
   const supabase = createClient()
+  const router = useRouter()
 
   const [user, setUser] = useState<User | null>(null)
   const [firm, setFirm] = useState<Firm | null>(null)
@@ -21,6 +23,7 @@ export default function AdminPage() {
   const [entries, setEntries] = useState<TimeEntry[]>([])
   const [editRequests, setEditRequests] = useState<EditRequest[]>([])
   const [loading, setLoading] = useState(true)
+  const [bannerRedirecting, setBannerRedirecting] = useState(false)
   const [activeTab, setActiveTab] = useState<'entries' | 'requests'>('entries')
 
   const [filters, setFilters] = useState<Filters>({
@@ -73,14 +76,30 @@ export default function AdminPage() {
         .eq('status', 'pending'),
     ])
 
-    setFirm(firmData as Firm)
+    const f = firmData as Firm
+    if (!f.onboarding_complete) {
+      router.push('/onboarding')
+      return
+    }
+
+    const isExpired =
+      f.subscription_status === 'canceled' ||
+      (f.subscription_status === 'past_due') ||
+      (f.subscription_status === 'trialing' && f.trial_ends_at !== null && new Date(f.trial_ends_at) < new Date())
+
+    if (isExpired) {
+      router.push('/billing')
+      return
+    }
+
+    setFirm(f)
     setLawyers((lawyersData as User[]) ?? [])
     setClients((clientsData as Client[]) ?? [])
     setTaskTypes((taskTypesData as TaskType[]) ?? [])
     setEntries((entriesData as TimeEntry[]) ?? [])
     setEditRequests((editRequestsData as EditRequest[]) ?? [])
     setLoading(false)
-  }, [supabase])
+  }, [supabase, router])
 
   useEffect(() => { loadData() }, [loadData])
 
@@ -126,9 +145,40 @@ export default function AdminPage() {
     )
   }
 
+  const trialDaysLeft = firm?.trial_ends_at
+    ? Math.max(0, Math.ceil((new Date(firm.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0
+
+  async function handleSubscribeFromBanner() {
+    setBannerRedirecting(true)
+    const res = await fetch('/api/stripe/create-checkout', { method: 'POST' })
+    const json = await res.json()
+    if (json.url) window.location.href = json.url
+    else { console.error('Checkout error:', json.error); setBannerRedirecting(false) }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar userName={user?.full_name} role={user?.role} />
+
+      {/* Trial banner */}
+      {firm?.subscription_status === 'trialing' && (
+        <div className="bg-gray-950 dark:bg-gray-900 border-b border-gray-800">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center justify-between gap-4">
+            <p className="text-sm text-gray-300">
+              <span className="font-semibold text-white">Free trial</span>
+              {trialDaysLeft > 0 ? ` · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} remaining` : ' · Expires today'}
+            </p>
+            <button
+              onClick={handleSubscribeFromBanner}
+              disabled={bannerRedirecting}
+              className="text-xs font-semibold text-white underline underline-offset-2 hover:text-gray-200 transition whitespace-nowrap disabled:opacity-50"
+            >
+              {bannerRedirecting ? 'Redirecting…' : 'Add payment method →'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}

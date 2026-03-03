@@ -6,6 +6,12 @@ export interface Firm {
   id: string
   name: string
   billing_increment: number
+  onboarding_complete: boolean
+  stripe_customer_id: string | null
+  stripe_subscription_id: string | null
+  subscription_status: 'trialing' | 'active' | 'past_due' | 'canceled' | null
+  trial_ends_at: string | null
+  plan_type: 'firm' | 'solo' | null
   created_at: string
 }
 

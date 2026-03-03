@@ -37,8 +37,11 @@ export default function AdminSettingsPage() {
   const [newLawyerName, setNewLawyerName] = useState('')
   const [billingIncrement, setBillingIncrement] = useState('0.1')
   const [saving, setSaving] = useState(false)
+  const [billingRedirecting, setBillingRedirecting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [editingClientId, setEditingClientId] = useState<string | null>(null)
+  const [editingClientName, setEditingClientName] = useState('')
 
   const loadData = useCallback(async () => {
     const { data: { user: authUser } } = await supabase.auth.getUser()
@@ -89,6 +92,15 @@ export default function AdminSettingsPage() {
     await loadData()
   }
 
+  async function handleRenameClient(id: string) {
+    const name = editingClientName.trim()
+    if (!name) return
+    await supabase.from('clients').update({ name }).eq('id', id)
+    setEditingClientId(null)
+    setEditingClientName('')
+    await loadData()
+  }
+
   async function handleAddTaskType(e: React.FormEvent) {
     e.preventDefault()
     if (!newTaskName.trim() || !firm) return
@@ -134,6 +146,30 @@ export default function AdminSettingsPage() {
     setSaving(false)
   }
 
+  async function handleSubscribe() {
+    setBillingRedirecting(true)
+    const res = await fetch('/api/stripe/create-checkout', { method: 'POST' })
+    const { url } = await res.json()
+    if (url) window.location.href = url
+    else setBillingRedirecting(false)
+  }
+
+  async function handleManageBilling() {
+    setBillingRedirecting(true)
+    const res = await fetch('/api/stripe/customer-portal', { method: 'POST' })
+    const { url } = await res.json()
+    if (url) window.location.href = url
+    else setBillingRedirecting(false)
+  }
+
+  const trialDaysLeft = firm?.trial_ends_at
+    ? Math.max(0, Math.ceil((new Date(firm.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0
+
+  const monthlyTotal = firm?.plan_type === 'solo'
+    ? 99
+    : 150 + (lawyers.length * 75)
+
   const inputClass = "flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white/30 focus:border-transparent transition"
   const btnPrimary = "bg-gray-950 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-gray-950 disabled:opacity-50 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition whitespace-nowrap"
 
@@ -172,6 +208,82 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Billing */}
+          <Section title="Billing">
+            <div id="billing">
+              {firm?.subscription_status === 'trialing' && (
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      Free trial
+                      {trialDaysLeft > 0
+                        ? ` · ${trialDaysLeft} day${trialDaysLeft === 1 ? '' : 's'} remaining`
+                        : ' · Expired'}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {firm.plan_type === 'solo' ? 'Solo plan — $99/month' : `Firm plan — $150/month + $75/month per lawyer`}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={billingRedirecting}
+                    className={btnPrimary}
+                  >
+                    {billingRedirecting ? 'Redirecting…' : 'Add payment method'}
+                  </button>
+                </div>
+              )}
+
+              {firm?.subscription_status === 'active' && (
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {firm.plan_type === 'solo' ? 'Solo plan' : `Firm plan · ${lawyers.length} lawyer seat${lawyers.length === 1 ? '' : 's'}`}
+                    </p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      ${monthlyTotal}/month
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleManageBilling}
+                    disabled={billingRedirecting}
+                    className={btnPrimary}
+                  >
+                    {billingRedirecting ? 'Redirecting…' : 'Manage billing'}
+                  </button>
+                </div>
+              )}
+
+              {firm?.subscription_status === 'past_due' && (
+                <div>
+                  <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg px-4 py-3 text-red-600 dark:text-red-400 text-sm mb-4">
+                    Payment failed. Update your payment method to avoid losing access.
+                  </div>
+                  <button
+                    onClick={handleManageBilling}
+                    disabled={billingRedirecting}
+                    className={btnPrimary}
+                  >
+                    {billingRedirecting ? 'Redirecting…' : 'Update payment method'}
+                  </button>
+                </div>
+              )}
+
+              {firm?.subscription_status === 'canceled' && (
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Your subscription is canceled.</p>
+                  <button
+                    onClick={handleSubscribe}
+                    disabled={billingRedirecting}
+                    className={btnPrimary}
+                  >
+                    {billingRedirecting ? 'Redirecting…' : 'Reactivate subscription'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </Section>
+
           {/* Appearance */}
           <Section title="Appearance">
             <div className="flex items-center justify-between">
@@ -234,20 +346,46 @@ export default function AdminSettingsPage() {
                 <p className="text-sm text-gray-400">No clients yet.</p>
               )}
               {clients.map((c) => (
-                <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0">
-                  <span className={`text-sm ${c.is_active ? 'text-gray-900 dark:text-white' : 'text-gray-300 dark:text-gray-600 line-through'}`}>
-                    {c.name}
-                  </span>
-                  <button
-                    onClick={() => handleToggleClient(c.id, c.is_active)}
-                    className={`text-xs px-3 py-1 rounded-full border font-medium transition ${
-                      c.is_active
-                        ? 'text-gray-400 border-gray-200 dark:border-gray-700 hover:text-red-600 hover:border-red-200 dark:hover:border-red-500/30'
-                        : 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
-                    }`}
-                  >
-                    {c.is_active ? 'Deactivate' : 'Reactivate'}
-                  </button>
+                <div key={c.id} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800 last:border-0 gap-3">
+                  {editingClientId === c.id ? (
+                    <form
+                      onSubmit={(e) => { e.preventDefault(); handleRenameClient(c.id) }}
+                      className="flex items-center gap-2 flex-1"
+                    >
+                      <input
+                        autoFocus
+                        value={editingClientName}
+                        onChange={(e) => setEditingClientName(e.target.value)}
+                        className={`${inputClass} flex-1`}
+                      />
+                      <button type="submit" className="text-xs font-medium text-gray-900 dark:text-white px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition">Save</button>
+                      <button type="button" onClick={() => setEditingClientId(null)} className="text-xs font-medium text-gray-400 px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition">Cancel</button>
+                    </form>
+                  ) : (
+                    <>
+                      <span className={`text-sm flex-1 ${c.is_active ? 'text-gray-900 dark:text-white' : 'text-gray-300 dark:text-gray-600 line-through'}`}>
+                        {c.name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => { setEditingClientId(c.id); setEditingClientName(c.name) }}
+                          className="text-xs text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition px-2 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+                        >
+                          Rename
+                        </button>
+                        <button
+                          onClick={() => handleToggleClient(c.id, c.is_active)}
+                          className={`text-xs px-3 py-1 rounded-full border font-medium transition ${
+                            c.is_active
+                              ? 'text-gray-400 border-gray-200 dark:border-gray-700 hover:text-red-600 hover:border-red-200 dark:hover:border-red-500/30'
+                              : 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+                          }`}
+                        >
+                          {c.is_active ? 'Deactivate' : 'Reactivate'}
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

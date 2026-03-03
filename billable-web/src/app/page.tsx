@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import LandingPage from '@/components/landing/LandingPage'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +9,7 @@ export default async function HomePage() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/login')
+    return <LandingPage />
   }
 
   const { data: profile } = await supabase

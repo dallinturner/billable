@@ -44,6 +44,14 @@ function clearTimerState(): Promise<void> {
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
+function MicIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+      <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" />
+    </svg>
+  )
+}
+
 function ChevronRight() {
   return (
     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -169,6 +177,28 @@ export default function App() {
     setTimer(null)
     setNotes('')
     setView('clients')
+  }
+
+  async function openVoiceWindow(client: Client) {
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
+    const startedAt = new Date().toISOString()
+    const { data: entry } = await supabase
+      .from('time_entries')
+      .insert({ user_id: session.user.id, client_id: client.id, started_at: startedAt, status: 'draft' })
+      .select('id')
+      .single()
+
+    if (!entry) return
+
+    chrome.windows.create({
+      url: `${process.env.WEBAPP_URL}/record?entry=${entry.id}`,
+      type: 'popup',
+      width: 420,
+      height: 560,
+      focused: true,
+    })
   }
 
   // ── Loading ───────────────────────────────────────────────────────────────
@@ -324,21 +354,29 @@ export default function App() {
         ) : (
           <div className="py-1">
             {clients.map((client) => (
-              <button
-                key={client.id}
-                onClick={() => startTimer(client)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-950 group transition-colors"
-              >
-                <div className="w-7 h-7 bg-gray-100 group-hover:bg-white/10 rounded-md flex items-center justify-center flex-shrink-0 transition-colors">
-                  <span className="text-[10px] font-bold text-gray-500 group-hover:text-white transition-colors">
-                    {getInitials(client.name)}
+              <div key={client.id} className="flex items-center">
+                <button
+                  onClick={() => startTimer(client)}
+                  className="flex-1 flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-950 group transition-colors"
+                >
+                  <div className="w-7 h-7 bg-gray-100 group-hover:bg-white/10 rounded-md flex items-center justify-center flex-shrink-0 transition-colors">
+                    <span className="text-[10px] font-bold text-gray-500 group-hover:text-white transition-colors">
+                      {getInitials(client.name)}
+                    </span>
+                  </div>
+                  <span className="flex-1 text-sm font-medium text-gray-800 group-hover:text-white truncate transition-colors">
+                    {client.name}
                   </span>
-                </div>
-                <span className="flex-1 text-sm font-medium text-gray-800 group-hover:text-white truncate transition-colors">
-                  {client.name}
-                </span>
-                <ChevronRight />
-              </button>
+                  <ChevronRight />
+                </button>
+                <button
+                  onClick={() => openVoiceWindow(client)}
+                  title="Record voice note"
+                  className="flex-shrink-0 flex items-center justify-center w-9 h-9 mr-2 text-gray-300 hover:text-gray-700 transition-colors rounded-md hover:bg-gray-100"
+                >
+                  <MicIcon />
+                </button>
+              </div>
             ))}
           </div>
         )}
